@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev # Dockerfile simples apenas com npm install e npm run dev
+    volumes:
+      - .:/app
+      - /app/node_modules # Volume anônimo para não sobrescrever os pacotes do container
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    stdin_open: true
+    tty: true

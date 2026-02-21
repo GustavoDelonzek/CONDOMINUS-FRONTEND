@@ -1,0 +1,18 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copia apenas os arquivos de dependências primeiro (otimiza cache)
+COPY package*.json ./
+
+# Instala as dependências (incluindo as de desenvolvimento)
+RUN npm install
+
+# Copia o restante dos arquivos
+COPY . .
+
+# Expõe a porta padrão do Vite
+EXPOSE 5173
+
+# O comando PRECISA do --host para o Docker conseguir mapear a porta
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
