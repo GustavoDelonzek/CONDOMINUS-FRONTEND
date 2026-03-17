@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, CreditCard, FileText, Layers, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, FileText, Building2, Settings } from 'lucide-react';
 
 interface SidebarProps {
   activeItem: string;
@@ -7,7 +7,7 @@ interface SidebarProps {
 
 const menuItems = [
   { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { id: 'condos', icon: Layers, label: 'Condominiums' },
+  { id: 'condos', icon: Building2, label: 'Condominiums' },
   { id: 'users', icon: Users, label: 'Users' },
   { id: 'documents', icon: FileText, label: 'Documents' },
   { id: 'billing', icon: CreditCard, label: 'Billing' },
@@ -16,12 +16,14 @@ const menuItems = [
 
 export function Sidebar({ activeItem, onNavigate }: SidebarProps) {
   return (
-    <aside className="w-16 h-screen flex flex-col items-center py-6 bg-sidebar border-r border-sidebar-border shrink-0">
+    <aside className="relative z-50 w-16 h-screen flex flex-col items-center py-6 bg-sidebar border-r border-sidebar-border shrink-0">
       {/* Logo */}
-      <div className="mb-8">
-        <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-brand">
-          <Layers size={20} className="text-white" />
-        </div>
+      <div className="mb-8 flex items-center justify-center w-full px-2">
+        <img
+          src="/logo.png"
+          alt="Condominus"
+          className="w-10 h-10 object-contain drop-shadow-md transition-transform duration-200 hover:scale-110"
+        />
       </div>
 
       {/* Navigation */}

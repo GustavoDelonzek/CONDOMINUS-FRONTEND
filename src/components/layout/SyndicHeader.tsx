@@ -45,12 +45,14 @@ export function SyndicHeader({
             <div className="hidden sm:block">
                 {getBreadcrumbs()}
             </div>
-            
-            {/* Mobile Logo or Title replacement for breadcrumbs */}
+
+            {/* Mobile Logo */}
             <div className="sm:hidden flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center shrink-0">
-                    <span className="text-white font-bold text-[10px]">CD</span>
-                </div>
+                <img
+                    src="/logo.png"
+                    alt="Condominus"
+                    className="w-8 h-8 object-contain"
+                />
                 <span className="font-bold text-sm text-foreground capitalize">
                     {activeItem === 'dashboard' ? 'Visão Geral' : activeItem}
                 </span>
@@ -58,7 +60,7 @@ export function SyndicHeader({
 
             {/* Right side: Voltar ao Super Admin & Bell */}
             <div className="flex items-center gap-3 md:gap-6">
-                <button 
+                <button
                     onClick={onBack}
                     className="flex items-center gap-2 text-[10px] md:text-sm font-semibold text-brand hover:text-brand/80 transition-colors bg-brand/10 px-2 md:px-3 py-1.5 rounded-lg"
                 >
@@ -66,7 +68,7 @@ export function SyndicHeader({
                     <span className="hidden xs:inline">Voltar ao Master</span>
                     <span className="xs:hidden">Voltar</span>
                 </button>
-                
+
                 <button className="text-muted-foreground hover:text-foreground relative p-1">
                     <Bell size={18} className="md:w-5 md:h-5" />
                     <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full border-2 border-card"></span>
