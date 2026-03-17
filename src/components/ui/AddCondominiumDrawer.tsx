@@ -1,5 +1,5 @@
-import { X, Search, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { X, Search, Loader2, User, UserSearch } from 'lucide-react';
+import React, { useState } from 'react';
 import { fetchCep } from '../../services/cepService';
 
 interface AddCondominiumDrawerProps {
@@ -34,6 +34,7 @@ export function AddCondominiumDrawer({ open, onClose, onSubmit }: AddCondominium
     const [form, setForm] = useState<CondominiumFormData>(EMPTY_FORM);
     const [cepLoading, setCepLoading] = useState(false);
     const [cepError, setCepError] = useState<string | null>(null);
+    const [contactSearch, setContactSearch] = useState('');
 
     function handleChange(field: keyof CondominiumFormData, value: string) {
         setForm((prev) => ({ ...prev, [field]: value }));
@@ -70,12 +71,14 @@ export function AddCondominiumDrawer({ open, onClose, onSubmit }: AddCondominium
     function handleSubmit() {
         onSubmit?.(form);
         setForm(EMPTY_FORM);
+        setContactSearch('');
         setCepError(null);
         onClose();
     }
 
     function handleCancel() {
         setForm(EMPTY_FORM);
+        setContactSearch('');
         setCepError(null);
         onClose();
     }
@@ -205,6 +208,52 @@ export function AddCondominiumDrawer({ open, onClose, onSubmit }: AddCondominium
                                 ))}
                             </select>
                         </Field>
+                    </div>
+
+                    {/* Primary Contact / Syndicate */}
+                    <div className="mt-2 pt-5 border-t border-border flex flex-col gap-4">
+                        <div className="flex items-center gap-2 text-brand">
+                            <User size={16} strokeWidth={2.5} />
+                            <span className="text-xs font-bold tracking-wider uppercase">Primary Contact / Syndicate</span>
+                        </div>
+                        
+                        <div className="border border-dashed border-border rounded-xl p-4 flex flex-col gap-3">
+                            <h3 className="text-sm font-semibold text-foreground">Assign User</h3>
+                            
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                    <UserSearch size={16} />
+                                </span>
+                                <input
+                                    type="text"
+                                    placeholder="Search by name or email..."
+                                    value={contactSearch}
+                                    onChange={(e) => setContactSearch(e.target.value)}
+                                    className={`${inputClass} pl-9`}
+                                />
+                            </div>
+
+                            {/* Suggestion Card (Mock) */}
+                            {contactSearch.trim().length > 0 && (
+                                <div className="p-3 bg-card border border-border rounded-lg flex items-center justify-between shadow-sm mt-1">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-sm">
+                                            JD
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-semibold text-foreground">John Doe (Suggested)</p>
+                                            <p className="text-xs text-muted-foreground">john.doe@example.com</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="text-xs font-bold text-brand uppercase tracking-wider hover:opacity-80 transition-opacity"
+                                    >
+                                        Select
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                 </div>

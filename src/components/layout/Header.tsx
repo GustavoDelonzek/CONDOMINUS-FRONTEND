@@ -8,7 +8,7 @@ interface HeaderProps {
 export function Header({
     title,
     userName = 'Gustavo Brizola',
-    userRole = 'Super Admin',
+    userRole = 'Company Admin',
     userInitials = 'GB',
 }: HeaderProps) {
     return (

@@ -1,4 +1,5 @@
 import { Eye, ArrowLeftRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 type PlanType = 'Premium' | 'Basic';
 type ApiStatus = 'Connected' | 'Disconnected';
@@ -56,6 +57,7 @@ export function CondominiumTable({
 }: CondominiumTableProps) {
     const from = (page - 1) * pageSize + 1;
     const to = Math.min(page * pageSize, total);
+    const navigate = useNavigate();
 
     return (
         <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
@@ -139,7 +141,11 @@ export function CondominiumTable({
 
                             {/* Actions */}
                             <div className="flex items-center gap-3">
-                                <button className="text-muted-foreground hover:text-foreground transition-colors" title="View">
+                                <button 
+                                    className="text-muted-foreground hover:text-foreground transition-colors" 
+                                    title="View"
+                                    onClick={() => navigate('/syndic/dashboard')}
+                                >
                                     <Eye size={16} />
                                 </button>
                                 <button className="text-muted-foreground hover:text-foreground transition-colors" title="Manage">
