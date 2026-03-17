@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Filter, MapPin, Phone, Mail, Clock, Image as ImageIcon, User } from 'lucide-react';
+import { Search, Filter, MapPin, Phone, Mail, Clock, Image as ImageIcon, User, FileText } from 'lucide-react';
 
 // --- Types ---
 type TicketStatus = 'Novo' | 'Pendente';
@@ -140,14 +140,17 @@ function PriorityBadge({ priority }: { priority: Priority }) {
 }
 
 export function TicketsInbox() {
-  const [selectedTicketId, setSelectedTicketId] = useState<string>(MOCK_TICKETS[0].id);
-  const selectedTicket = MOCK_TICKETS.find(t => t.id === selectedTicketId) || MOCK_TICKETS[0];
+  const [selectedTicketId, setSelectedTicketId] = useState<string>(MOCK_TICKETS[0]?.id || '');
+  const selectedTicket = MOCK_TICKETS.find(t => t.id === selectedTicketId);
 
   return (
-    <div className="flex h-full bg-background overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-full bg-background overflow-hidden relative">
       
-      {/* Left Panel: Ticket List */}
-      <div className="w-[380px] flex flex-col bg-card border-r border-border shrink-0 z-10 shadow-[2px_0_8px_rgba(0,0,0,0.02)]">
+      {/* Left Panel: Ticket List - Hidden when ticket selected on mobile */}
+      <div className={`
+        w-full lg:w-[380px] flex flex-col bg-card border-r border-border shrink-0 z-10 shadow-[2px_0_8px_rgba(0,0,0,0.02)]
+        ${selectedTicketId ? 'hidden lg:flex' : 'flex'}
+      `}>
         
         {/* Header */}
         <div className="p-4 md:p-6 border-b border-border">
@@ -203,36 +206,58 @@ export function TicketsInbox() {
         </div>
       </div>
 
-      {/* Middle Panel: Ticket Details */}
-      <div className="flex-1 flex flex-col bg-card min-w-0 border-r border-border">
+      {/* Middle Panel: Ticket Details - Visible full width on mobile when selected */}
+      <div className={`
+        flex-1 flex flex-col bg-card min-w-0 border-r border-border relative
+        ${!selectedTicketId ? 'hidden lg:flex' : 'flex'}
+      `}>
+        {/* Mobile Back Button */}
+        <button 
+          onClick={() => setSelectedTicketId('')}
+          className="lg:hidden absolute top-4 left-4 p-2 text-brand font-bold flex items-center gap-1 z-20"
+        >
+          &lsaquo; Voltar
+        </button>
         
         {/* Content area */}
-        <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 mt-10 lg:mt-0 custom-scrollbar">
           <div className="max-w-3xl">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="font-bold text-muted-foreground">{selectedTicket.number}</span>
-              <StatusBadge status={selectedTicket.status} />
-              <span className="flex items-center gap-1 text-xs text-muted-foreground"><Clock size={12} /> {selectedTicket.timeAgo}</span>
-            </div>
-            <h1 className="text-2xl font-bold text-foreground mb-8 leading-tight">{selectedTicket.title}</h1>
+            {selectedTicket ? (
+             <>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="font-bold text-muted-foreground">{selectedTicket.number}</span>
+                <StatusBadge status={selectedTicket.status} />
+                <span className="flex items-center gap-1 text-xs text-muted-foreground"><Clock size={12} /> {selectedTicket.timeAgo}</span>
+              </div>
+              <h1 className="text-2xl font-bold text-foreground mb-8 leading-tight">{selectedTicket.title}</h1>
+             </>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-center p-12 opacity-50">
+                <FileText size={48} className="mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-bold">Selecione um Ticket</h3>
+                <p className="text-sm">Escolha um ticket na lista para visualizar os detalhes e o histórico.</p>
+              </div>
+            )}
 
-            <section className="mb-10">
-              <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Detalhes da Ocorrência</h3>
-              <p className="text-sm text-foreground leading-relaxed">
-                {selectedTicket.id === '1' ? 
-                  "Gostaria de registrar uma reclamação sobre barulho excessivo vindo do apartamento 303. O som está extremamente alto, com música e gritos, e já passa das 22h, o que infringe as regras de silêncio do condomínio. Tentei interfonar mas ninguém atende. Por favor, verificar a situação pois está impossível descansar." :
-                  selectedTicket.description
-                }
-              </p>
-            </section>
+            {selectedTicket && (
+              <section className="mb-10">
+                <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Detalhes da Ocorrência</h3>
+                <p className="text-sm text-foreground leading-relaxed">
+                  {selectedTicket.id === '1' ? 
+                    "Gostaria de registrar uma reclamação sobre barulho excessivo vindo do apartamento 303. O som está extremamente alto, com música e gritos, e já passa das 22h, o que infringe as regras de silêncio do condomínio. Tentei interfonar mas ninguém atende. Por favor, verificar a situação pois está impossível descansar." :
+                    selectedTicket.description
+                  }
+                </p>
+              </section>
+            )}
 
-            {selectedTicket.evidences.length > 0 && (
+            {selectedTicket && selectedTicket.evidences.length > 0 && (
               <section className="mb-10">
                 <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Evidências Anexadas</h3>
                 <div className="flex gap-4 overflow-x-auto pb-2">
-                  {[1, 2].map((i) => (
+                  {selectedTicket.evidences.map((evidence, i) => (
                     <div key={i} className="w-48 h-32 bg-accent rounded-lg border border-border flex items-center justify-center text-muted-foreground shrink-0 overflow-hidden">
-                       <span className="flex flex-col items-center gap-2 opacity-50"><ImageIcon size={24}/> Imagem {i}</span>
+                       <span className="flex flex-col items-center gap-2 opacity-50"><ImageIcon size={24}/> {evidence || `Imagem ${i + 1}`}</span>
                     </div>
                   ))}
                 </div>
@@ -244,7 +269,7 @@ export function TicketsInbox() {
               
               <div className="space-y-6">
                 
-                {selectedTicket.history.map((item) => (
+                {selectedTicket && selectedTicket.history.map((item) => (
                   <div key={item.id} className="flex items-start gap-4 pb-6 border-b border-border/50">
                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-brand/10 shrink-0 mt-0.5">
                         <div className="w-2 h-2 rounded-full bg-brand"></div>
@@ -293,79 +318,81 @@ export function TicketsInbox() {
       </div>
 
       {/* Right Panel: Ticket Meta */}
-      <div className="w-[300px] bg-card border-l border-border p-6 shrink-0 overflow-y-auto custom-scrollbar shadow-[0_0_8px_rgba(0,0,0,0.02)] hidden lg:block">
-         
-         <div className="space-y-6">
-            <div>
-              <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Status Atual</label>
-              <div className="relative">
-                 <select className="w-full appearance-none bg-background border border-border rounded-lg px-3 py-2 text-sm font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-brand">
-                   <option>{selectedTicket.status}</option>
-                   <option>Resovido</option>
-                   <option>Rejeitado</option>
-                 </select>
+      {selectedTicket && (
+        <div className="w-[300px] bg-card border-l border-border p-6 shrink-0 overflow-y-auto custom-scrollbar shadow-[0_0_8px_rgba(0,0,0,0.02)] hidden lg:block">
+           
+           <div className="space-y-6">
+              <div>
+                <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Status Atual</label>
+                <div className="relative">
+                   <select className="w-full appearance-none bg-background border border-border rounded-lg px-3 py-2 text-sm font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-brand">
+                     <option>{selectedTicket.status}</option>
+                     <option>Resolvido</option>
+                     <option>Rejeitado</option>
+                   </select>
+                </div>
               </div>
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Atribuído Para</label>
-              <button className="w-full flex items-center justify-center gap-2 bg-background border border-border rounded-lg px-3 py-2 text-sm font-semibold text-muted-foreground hover:bg-accent transition-colors">
-                 <User size={16} />
-                 {selectedTicket.assignedTo}
-              </button>
-            </div>
-
-            <div className="pb-6 border-b border-border border-dashed">
-              <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Prioridade</label>
-              <PriorityBadge priority={selectedTicket.priority} />
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-4">Solicitante</label>
-              
-              <div className="flex items-center gap-3 mb-6">
-                 <div className="w-10 h-10 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold text-sm">
-                   {selectedTicket.requesterInitials}
-                 </div>
-                 <div>
-                   <p className="font-bold text-sm text-foreground">{selectedTicket.requesterName}</p>
-                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{selectedTicket.requesterRole}</p>
-                 </div>
+  
+              <div>
+                <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Atribuído Para</label>
+                <button className="w-full flex items-center justify-center gap-2 bg-background border border-border rounded-lg px-3 py-2 text-sm font-semibold text-muted-foreground hover:bg-accent transition-colors">
+                   <User size={16} />
+                   {selectedTicket.assignedTo}
+                </button>
               </div>
-
-              <div className="space-y-4 mb-6">
-                 <div className="flex items-start gap-3 text-sm">
-                    <MapPin size={16} className="text-muted-foreground mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Unidade</p>
-                      <p className="font-medium text-foreground">{selectedTicket.unit}, {selectedTicket.block}</p>
-                    </div>
-                 </div>
-                 <div className="flex items-start gap-3 text-sm">
-                    <Phone size={16} className="text-muted-foreground mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Telefone</p>
-                      <p className="font-medium text-foreground">{selectedTicket.requesterPhone}</p>
-                    </div>
-                 </div>
-                 <div className="flex items-start gap-3 text-sm">
-                    <Mail size={16} className="text-muted-foreground mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Email</p>
-                      <p className="font-medium text-foreground truncate w-40">{selectedTicket.requesterEmail}</p>
-                    </div>
-                 </div>
+  
+              <div className="pb-6 border-b border-border border-dashed">
+                <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Prioridade</label>
+                <PriorityBadge priority={selectedTicket.priority} />
               </div>
-
-              <button className="w-full px-4 py-2 bg-background border border-border rounded-lg text-sm font-semibold text-foreground hover:bg-accent hover:text-brand transition-colors">
-                 Ver Perfil Completo
-              </button>
-
-            </div>
-
-         </div>
-
-      </div>
+  
+              <div>
+                <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-4">Solicitante</label>
+                
+                <div className="flex items-center gap-3 mb-6">
+                   <div className="w-10 h-10 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold text-sm">
+                     {selectedTicket.requesterInitials}
+                   </div>
+                   <div>
+                     <p className="font-bold text-sm text-foreground">{selectedTicket.requesterName}</p>
+                     <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{selectedTicket.requesterRole}</p>
+                   </div>
+                </div>
+  
+                <div className="space-y-4 mb-6">
+                   <div className="flex items-start gap-3 text-sm">
+                      <MapPin size={16} className="text-muted-foreground mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Unidade</p>
+                        <p className="font-medium text-foreground">{selectedTicket.unit}, {selectedTicket.block}</p>
+                      </div>
+                   </div>
+                   <div className="flex items-start gap-3 text-sm">
+                      <Phone size={16} className="text-muted-foreground mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Telefone</p>
+                        <p className="font-medium text-foreground">{selectedTicket.requesterPhone}</p>
+                      </div>
+                   </div>
+                   <div className="flex items-start gap-3 text-sm">
+                      <Mail size={16} className="text-muted-foreground mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Email</p>
+                        <p className="font-medium text-foreground truncate w-40">{selectedTicket.requesterEmail}</p>
+                      </div>
+                   </div>
+                </div>
+  
+                <button className="w-full px-4 py-2 bg-background border border-border rounded-lg text-sm font-semibold text-foreground hover:bg-accent hover:text-brand transition-colors">
+                   Ver Perfil Completo
+                </button>
+  
+              </div>
+  
+           </div>
+  
+        </div>
+      )}
 
     </div>
   );

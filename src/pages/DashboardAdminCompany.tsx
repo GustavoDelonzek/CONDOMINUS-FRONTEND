@@ -43,8 +43,8 @@ export function DashboardAdminCompany() {
 
     return (
         <>
-            <div className="p-8 flex flex-col gap-6">
-                <div className="grid grid-cols-3 gap-5">
+            <div className="p-4 md:p-8 flex flex-col gap-6 h-full overflow-y-auto custom-scrollbar">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <MetricCard
                         label="Total Condominiums"
                         value="1,248"

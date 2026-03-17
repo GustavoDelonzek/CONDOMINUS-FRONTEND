@@ -40,24 +40,36 @@ export function SyndicHeader({
     };
 
     return (
-        <header className="px-8 py-4 flex items-center justify-between border-b border-border bg-card shrink-0">
-            {/* Left side: Breadcrumbs */}
-            {getBreadcrumbs()}
+        <header className="px-4 md:px-8 py-3 md:py-4 flex items-center justify-between border-b border-border bg-card shrink-0 sticky top-0 z-40">
+            {/* Left side: Breadcrumbs - Hidden on very small screens */}
+            <div className="hidden sm:block">
+                {getBreadcrumbs()}
+            </div>
+            
+            {/* Mobile Logo or Title replacement for breadcrumbs */}
+            <div className="sm:hidden flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center shrink-0">
+                    <span className="text-white font-bold text-[10px]">CD</span>
+                </div>
+                <span className="font-bold text-sm text-foreground capitalize">
+                    {activeItem === 'dashboard' ? 'Visão Geral' : activeItem}
+                </span>
+            </div>
 
             {/* Right side: Voltar ao Super Admin & Bell */}
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3 md:gap-6">
                 <button 
                     onClick={onBack}
-                    className="flex items-center gap-2 text-sm font-semibold text-brand hover:text-brand/80 transition-colors bg-brand/10 px-3 py-1.5 rounded-lg"
+                    className="flex items-center gap-2 text-[10px] md:text-sm font-semibold text-brand hover:text-brand/80 transition-colors bg-brand/10 px-2 md:px-3 py-1.5 rounded-lg"
                 >
-                    <ArrowLeft size={16} />
-                    Voltar ao Super Admin
+                    <ArrowLeft size={14} className="md:w-4 md:h-4" />
+                    <span className="hidden xs:inline">Voltar ao Master</span>
+                    <span className="xs:hidden">Voltar</span>
                 </button>
                 
-                <button className="text-muted-foreground hover:text-foreground relative">
-                    <Bell size={20} />
-                    {/* Red dot to match screenshot */}
-                    <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-card"></span>
+                <button className="text-muted-foreground hover:text-foreground relative p-1">
+                    <Bell size={18} className="md:w-5 md:h-5" />
+                    <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full border-2 border-card"></span>
                 </button>
             </div>
         </header>

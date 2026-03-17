@@ -102,16 +102,16 @@ function Badge({ variant, children }: { variant: 'Proprietário' | 'Inquilino' |
 // --- Main Page Component ---
 export function Residents() {
     return (
-        <div className="flex flex-col gap-6 h-full p-6 bg-background">
+        <div className="flex flex-col gap-4 md:gap-6 h-full p-4 md:p-6 bg-background">
 
             <div className="flex-1 w-full overflow-y-auto pr-2 custom-scrollbar">
                 <div className="w-full min-h-full flex flex-col">
 
                     {/* Page Header */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
                         <div>
                             <h1 className="text-2xl font-bold text-foreground">Moradores e Unidades</h1>
-                            <p className="text-muted-foreground mt-1 text-sm">Gerencie o cadastro de moradores, proprietários e inquilinos.</p>
+                            <p className="text-muted-foreground mt-0.5 text-xs md:text-sm">Gerencie o cadastro de moradores, proprietários e inquilinos.</p>
                         </div>
                         <button className="bg-brand text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-brand/90 transition-colors shadow-sm shrink-0">
                             <Plus size={18} />

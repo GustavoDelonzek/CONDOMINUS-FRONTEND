@@ -23,7 +23,7 @@ const UPCOMING_BILLS = [
 
 export function FinancialTransparency() {
   return (
-    <div className="flex flex-col gap-6 h-full p-4 lg:p-6 bg-background overflow-y-auto custom-scrollbar">
+    <div className="flex flex-col gap-4 md:gap-6 h-full p-4 md:p-6 bg-background overflow-y-auto custom-scrollbar">
       
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

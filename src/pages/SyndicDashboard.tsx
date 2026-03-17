@@ -3,7 +3,7 @@ import { SyndicStatCard } from '../components/cards/SyndicStatCard';
 
 export function SyndicDashboard() {
   return (
-    <div className="flex gap-6 h-full p-6 bg-background">
+    <div className="flex flex-col xl:flex-row gap-6 h-full p-4 md:p-6 bg-background">
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col gap-6 overflow-y-auto pr-2 custom-scrollbar">
         {/* Hero Banner */}
@@ -125,7 +125,7 @@ export function SyndicDashboard() {
       </div>
 
       {/* Right Sidebar Area */}
-      <div className="w-80 flex flex-col gap-6 shrink-0">
+      <div className="w-full xl:w-80 flex flex-col gap-6 shrink-0">
 
 
           {/* Quick Actions */}

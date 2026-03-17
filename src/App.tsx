@@ -60,9 +60,9 @@ function SyndicLayout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background font-sans">
+    <div className="flex flex-col md:flex-row min-h-screen bg-background font-sans">
       <SyndicSidebar activeItem={activeItem} onNavigate={handleNavigate} />
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0">
         <SyndicHeader activeItem={activeItem} onBack={() => navigate('/admin/dashboard')} />
         <div className="flex-1 overflow-y-auto">
           <Routes>

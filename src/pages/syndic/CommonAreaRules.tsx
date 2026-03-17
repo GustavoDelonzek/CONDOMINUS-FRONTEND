@@ -101,7 +101,7 @@ export function CommonAreaRules() {
   );
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 md:p-8 space-y-8 h-full overflow-y-auto custom-scrollbar">
       {/* Header Section */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Regras de Áreas Comuns</h1>
@@ -109,10 +109,9 @@ export function CommonAreaRules() {
           Visão geral e edição rápida das configurações de instalações.
         </p>
       </div>
-
-      {/* Actions Section */}
-      <div className="flex items-center justify-between">
-        <div className="relative w-80">
+{/* Actions Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="relative w-full md:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
           <input
             type="text"
@@ -126,7 +125,7 @@ export function CommonAreaRules() {
         <div className="flex items-center gap-3">
           <button className="flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg text-sm font-semibold text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-all shadow-sm">
             <History size={18} />
-            Histórico
+            <span className="hidden sm:inline">Histórico</span>
           </button>
           <button className="flex items-center gap-2 px-6 py-2 bg-brand text-white rounded-lg text-sm font-bold hover:bg-brand/90 transition-all shadow-sm">
             <Plus size={20} />
@@ -136,8 +135,8 @@ export function CommonAreaRules() {
       </div>
 
       {/* Table Container */}
-      <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full border-collapse">
+      <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden overflow-x-auto">
+        <table className="w-full border-collapse whitespace-nowrap">
           <thead>
             <tr className="bg-accent/30 border-b border-border text-left">
               <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground w-[30%]">Área</th>

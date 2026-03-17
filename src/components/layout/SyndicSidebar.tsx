@@ -15,7 +15,9 @@ const topMenuItems = [
 
 export function SyndicSidebar({ activeItem, onNavigate }: SyndicSidebarProps) {
   return (
-    <aside className="w-16 h-screen flex flex-col items-center py-6 bg-sidebar border-r border-sidebar-border shrink-0">
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-16 h-screen flex-col items-center py-6 bg-sidebar border-r border-sidebar-border shrink-0 sticky top-0">
       {/* Logo */}
       <div className="mb-8">
         <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-brand">
@@ -83,5 +85,35 @@ export function SyndicSidebar({ activeItem, onNavigate }: SyndicSidebarProps) {
         </button>
       </div>
     </aside>
+
+    {/* Mobile Bottom Navigation */}
+      <nav className="flex md:hidden fixed bottom-0 left-0 right-0 h-16 bg-sidebar border-t border-sidebar-border items-center justify-around px-2 z-50">
+        {topMenuItems.map((item) => {
+          const isActive = item.id === activeItem;
+          const Icon = item.icon;
+
+          return (
+            <button
+              key={item.id}
+              onClick={() => onNavigate?.(item.id)}
+              className={`
+                flex flex-col items-center justify-center gap-1 flex-1 h-full
+                transition-all duration-150
+                ${isActive
+                  ? 'text-sidebar-active-fg'
+                  : 'text-sidebar-icon'
+                }
+              `}
+            >
+              <Icon size={20} strokeWidth={isActive ? 2.5 : 1.75} />
+              <span className="text-[10px] font-medium leading-none">{item.label}</span>
+              {isActive && (
+                <span className="absolute bottom-0 w-8 h-1 bg-brand rounded-t-full shadow-[0_-1px_4px_rgba(49,87,242,0.4)]" />
+              )}
+            </button>
+          );
+        })}
+      </nav>
+    </>
   );
 }
