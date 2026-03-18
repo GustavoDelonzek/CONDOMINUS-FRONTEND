@@ -16,6 +16,9 @@ export default {
         error: '#DC2F1C',      // Red
         warning: '#FFBD00',    // Yellow
         'gray-text': '#64748b',
+        'gray-blue': {
+          100: '#F9FBFD',
+        }
       },
       borderRadius: {
         'card': '12px',

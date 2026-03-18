@@ -39,7 +39,7 @@ export function SyndicSidebar({ activeItem, onNavigate }: SyndicSidebarProps) {
                 title={item.label}
                 onClick={() => onNavigate?.(item.id)}
                 className={`
-                relative w-10 h-10 rounded-lg flex items-center justify-center
+                relative w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer
                 transition-all duration-150 group
                 ${isActive
                     ? 'bg-sidebar-active-bg text-sidebar-active-fg'
@@ -69,7 +69,7 @@ export function SyndicSidebar({ activeItem, onNavigate }: SyndicSidebarProps) {
             title="Sair"
             onClick={() => console.log('Logout')}
             className="
-            relative w-10 h-10 rounded-lg flex items-center justify-center
+            relative w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer
             transition-all duration-150 group text-sidebar-icon hover:bg-sidebar-accent hover:text-red-500
           "
           >
@@ -99,7 +99,7 @@ export function SyndicSidebar({ activeItem, onNavigate }: SyndicSidebarProps) {
               key={item.id}
               onClick={() => onNavigate?.(item.id)}
               className={`
-                flex flex-col items-center justify-center gap-1 flex-1 h-full
+                flex flex-col items-center justify-center gap-1 flex-1 h-full cursor-pointer
                 transition-all duration-150
                 ${isActive
                   ? 'text-sidebar-active-fg'

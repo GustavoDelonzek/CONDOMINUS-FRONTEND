@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, MapPin, Phone, Mail, Clock, Calendar as CalendarIcon } from 'lucide-react';
+import { Search, Clock, Calendar as CalendarIcon, Bell, Filter, MapPin, Phone, Mail } from 'lucide-react';
 import { CommonAreaRules } from './CommonAreaRules';
 
 type ReservationStatus = 'Aguardando Aprovação' | 'Confirmado' | 'Recusado' | 'Concluído';
@@ -103,15 +103,15 @@ const MOCK_RESERVATIONS: Reservation[] = [
 // --- Badges ---
 function StatusBadge({ status }: { status: ReservationStatus }) {
   if (status === 'Aguardando Aprovação') {
-    return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-yellow-100 text-yellow-700">Aguardando Aprovação</span>;
+    return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-yellow-600 border border-yellow-200"><span className="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>Pendentes</span>;
   }
   if (status === 'Confirmado') {
-     return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-green-50 text-green-600 border border-green-500/20">Confirmado</span>;
+     return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-green-600 border border-green-200"><span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>Confirmado</span>;
   }
   if (status === 'Recusado') {
-     return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-600 border border-red-500/20">Recusado</span>;
+     return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-brand border border-brand/20"><span className="w-1.5 h-1.5 rounded-full bg-brand"></span>Novo</span>;
   }
-  return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-accent text-muted-foreground border border-border">Concluído</span>;
+  return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-muted-foreground border border-border"><span className="w-1.5 h-1.5 rounded-full bg-muted-foreground"></span>Concluído</span>;
 }
 
 export function Reservations() {
@@ -121,20 +121,30 @@ export function Reservations() {
 
   return (
     <div className="flex flex-col h-full bg-background overflow-hidden relative">
-      {/* Header Tabs */}
-      <div className="flex items-center gap-6 px-8 pt-4 border-b border-border bg-card shrink-0">
-        <button 
-          onClick={() => setActiveTab('reservations')}
-          className={`text-sm pb-3 transition-all ${activeTab === 'reservations' ? 'font-bold text-brand border-b-2 border-brand' : 'font-semibold text-muted-foreground hover:text-foreground'}`}
-        >
-          Reservas
-        </button>
-        <button 
-          onClick={() => setActiveTab('rules')}
-          className={`text-sm pb-3 transition-all ${activeTab === 'rules' ? 'font-bold text-brand border-b-2 border-brand' : 'font-semibold text-muted-foreground hover:text-foreground'}`}
-        >
-          Configuração de Regras
-        </button>
+      <div className="flex items-center justify-between px-8 pt-4 border-b border-border bg-card shrink-0 h-[72px]">
+        <div className="flex items-center gap-8 h-full">
+          <button 
+            onClick={() => setActiveTab('reservations')}
+            className={`text-sm h-full flex items-center border-b-2 cursor-pointer transition-colors ${activeTab === 'reservations' ? 'font-bold text-brand border-brand' : 'font-semibold text-muted-foreground hover:text-foreground border-transparent'}`}
+          >
+            Reservas
+          </button>
+          <button 
+            onClick={() => setActiveTab('rules')}
+            className={`text-sm h-full flex items-center border-b-2 cursor-pointer transition-colors ${activeTab === 'rules' ? 'font-bold text-brand border-brand' : 'font-semibold text-muted-foreground hover:text-foreground border-transparent'}`}
+          >
+            Configuração de Regras
+          </button>
+        </div>
+        <div className="flex items-center gap-6">
+          <button className="flex items-center gap-2 cursor-pointer bg-brand text-white px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-brand/90 transition-colors shadow-sm">
+            <span className="text-lg leading-none">+</span> Nova Reserva
+          </button>
+          <button className="text-muted-foreground hover:text-foreground cursor-pointer relative">
+            <Bell size={20} />
+            <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-card"></span>
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
@@ -146,44 +156,60 @@ export function Reservations() {
               ${selectedResId ? 'hidden lg:flex' : 'flex'}
             `}>
               <div className="p-4 md:p-6 flex flex-col h-full overflow-hidden">
-                <button className="w-full flex items-center justify-center gap-2 bg-brand text-white py-2.5 rounded-lg font-bold text-sm hover:bg-brand/90 transition-colors mb-6 shadow-sm">
-                   <span className="text-lg leading-none">+</span> Nova Reserva
-                </button>
 
-                <h3 className="font-bold text-base text-foreground mb-3">Solicitações Pendentes</h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-bold text-xl text-foreground">Reservas</h3>
+                  <button className="text-muted-foreground hover:text-foreground cursor-pointer">
+                    <Filter size={20} strokeWidth={1.5} />
+                  </button>
+                </div>
                 
-                <div className="flex items-center gap-2 mb-4">
-                   <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-[10px] font-bold uppercase rounded-full">3 Novos</span>
+                <div className="flex items-center gap-4 border-b border-border/50 pb-4 mb-4">
+                  <button className="px-4 py-1.5 bg-brand/10 text-brand cursor-pointer text-sm font-bold rounded-full">
+                    Todos ({MOCK_RESERVATIONS.length})
+                  </button>
+                  <button className="text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                    Novos (1)
+                  </button>
+                  <button className="text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                    Pendentes (1)
+                  </button>
                 </div>
 
                 <div className="relative mb-6">
                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input 
                     type="text" 
-                    placeholder="Buscar por apto ou área..." 
-                    className="w-full pl-9 pr-4 py-2 bg-accent/50 border border-border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brand placeholder:text-muted-foreground"
+                    placeholder="Filtrar reservas..." 
+                    className="w-full pl-9 pr-4 py-2.5 bg-accent/30 border border-border/50 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brand placeholder:text-muted-foreground"
                   />
                 </div>
 
                 {/* List */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar -mx-2 px-2">
+                <div className="flex-1 overflow-y-auto custom-scrollbar -mx-4 md:-mx-6">
                   {MOCK_RESERVATIONS.map(res => (
                     <div 
                       key={res.id}
                       onClick={() => setSelectedResId(res.id)}
-                      className={`p-4 rounded-xl cursor-pointer transition-colors mb-2 relative
-                        ${selectedResId === res.id ? 'bg-accent/80' : 'hover:bg-accent/40'}
+                      className={`p-4 md:p-6 cursor-pointer transition-colors border-b border-border relative
+                        ${selectedResId === res.id ? 'bg-background border-l-[3px] border-l-brand' : 'bg-card hover:bg-accent/20 border-l-[3px] border-l-transparent'}
                       `}
                     >
-                      <div className="flex justify-between items-start mb-1">
-                        <h4 className="font-bold text-sm text-foreground">{res.spaceName}</h4>
-                        <span className="text-[10px] text-muted-foreground font-medium">{res.timeAgo}</span>
+                      <div className="flex justify-between items-start mb-3">
+                        <StatusBadge status={res.status} />
+                        <span className="text-[11px] text-muted-foreground font-medium">{res.timeAgo}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground mb-2">{res.unit} - {res.requesterName.split(' ')[0]}</p>
                       
-                      <div className="flex justify-between items-center text-xs text-muted-foreground font-medium">
-                        <span className="flex items-center gap-1"><CalendarIcon size={12} /> {res.date.split(' ')[0]} {res.date.split(' ')[2]}</span>
-                        <span className="flex items-center gap-1"><Clock size={12} /> {res.timeRange}</span>
+                      <h4 className="font-bold text-sm text-foreground mb-1 leading-tight">{res.spaceName}</h4>
+                      <p className="text-[11px] text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
+                         Reserva solicitada por {res.requesterName.split(' ')[0]} para {res.date} ({res.timeRange}). {res.observations && `Obs: ${res.observations}`}
+                      </p>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-accent text-[10px] font-bold text-muted-foreground uppercase rounded">
+                           <span className="text-brand font-black">A</span> {res.block || res.unit}
+                        </span>
+                        <span className="text-[11px] font-bold text-muted-foreground">#{res.id.padStart(4, '482')}</span>
                       </div>
                     </div>
                   ))}
@@ -199,118 +225,121 @@ export function Reservations() {
               {/* Mobile Back Button */}
               <button 
                 onClick={() => setSelectedResId('')}
-                className="lg:hidden absolute top-4 left-4 p-2 text-brand font-bold flex items-center gap-1 z-20"
+                className="lg:hidden absolute top-4 left-4 p-2 cursor-pointer text-brand font-bold flex items-center gap-1 z-20"
               >
                 &lsaquo; Voltar
               </button>
 
-              <div className="absolute top-6 right-4 md:right-8 flex gap-2 md:gap-3 z-10">
-                  <button className="px-3 md:px-6 py-2 bg-background border border-red-500 text-red-500 text-[10px] md:text-sm font-bold rounded-lg hover:bg-red-50 transition-colors flex items-center gap-1 md:gap-2">
-                    <span className="text-sm md:text-lg leading-none">&times;</span> <span className="hidden xs:inline">Rejeitar</span>
-                  </button>
-                  <button className="px-3 md:px-6 py-2 bg-green-500 text-white text-[10px] md:text-sm font-bold rounded-lg hover:bg-green-600 transition-colors flex items-center gap-1 md:gap-2 shadow-sm">
-                    <span className="text-xs md:text-base leading-none">&#10003;</span> <span className="hidden xs:inline">Aprovar Reserva</span>
-                    <span className="xs:hidden">Aprovar</span>
-                  </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-10 custom-scrollbar">
-                <div className="max-w-4xl mt-12 lg:mt-0">
+              <div className="flex-1 overflow-y-auto p-6 md:p-8 lg:p-12 custom-scrollbar bg-gray-blue-100">
+                <div className="w-full">
                   {selectedRes ? (
                     <>
-                      <div className="flex justify-between items-start mb-8 lg:pr-[300px]">
+                      <div className="flex flex-col md:flex-row md:items-start justify-between mb-10 gap-6">
                          <div>
-                            <h1 className="text-2xl font-bold text-foreground mb-3">{selectedRes.spaceName}</h1>
+                            <h1 className="text-3xl font-black text-foreground mb-4 tracking-tight">{selectedRes.spaceName}</h1>
                             <StatusBadge status={selectedRes.status} />
                          </div>
-                      </div>
+                         
+                         <div className="flex items-center gap-4 shrink-0 mt-2 md:mt-0">
+                            <button className="text-sm font-bold cursor-pointer text-muted-foreground hover:text-foreground transition-colors mr-2">
+                              Enviar Mensagem
+                            </button>
+                            <button className="w-11 h-11 flex cursor-pointer items-center justify-center bg-gray-blue-100 border border-red-400 text-red-500 rounded-xl hover:bg-red-50 transition-colors">
+                              <span className="text-xl leading-none mb-1">&times;</span>
+                            </button>
+                            <button className="px-6 py-2.5 cursor-pointer bg-[#00C853] text-white text-sm font-bold rounded-xl hover:bg-[#00e676] transition-colors flex items-center gap-2 shadow-sm">
+                              <span className="text-base leading-none">&#10003;</span> Aprovar
+                            </button>
+                         </div>
+                      </div>                   
     
                       {/* Date / Time Cards */}
-                      <div className="grid grid-cols-2 gap-4 mb-8">
-                         <div className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0">
-                              <CalendarIcon size={20} />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                         <div className="bg-gray-blue-100 border-2 border-slate-100 rounded-2xl p-6 flex items-center gap-5 shadow-sm">
+                            <div className="w-12 h-12 rounded-full bg-brand/5 text-brand flex items-center justify-center shrink-0">
+                              <CalendarIcon size={24} strokeWidth={1.5} />
                             </div>
                             <div>
-                              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-0.5">Data</p>
-                              <p className="text-sm font-bold text-foreground">{selectedRes.date}</p>
+                              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">Data</p>
+                              <p className="text-base font-bold text-foreground">{selectedRes.date}</p>
                             </div>
                          </div>
-                         <div className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0">
-                              <Clock size={20} />
+                         <div className="bg-gray-blue-100 border-2 border-slate-100 rounded-2xl p-6 flex items-center gap-5 shadow-sm">
+                            <div className="w-12 h-12 rounded-full bg-brand/5 text-brand flex items-center justify-center shrink-0">
+                              <Clock size={24} strokeWidth={1.5} />
                             </div>
                             <div>
-                              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-0.5">Horário</p>
-                              <p className="text-sm font-bold text-foreground">{selectedRes.timeRange} ({selectedRes.duration})</p>
+                              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">Horário</p>
+                              <p className="text-base font-bold text-foreground">{selectedRes.timeRange} <span className="text-muted-foreground font-medium">({selectedRes.duration})</span></p>
                             </div>
                          </div>
                       </div>
     
                       {/* Timeline UI Placeholder */}
-                      <div className="mb-8">
-                         <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-4">Disponibilidade do Dia ({selectedRes.date.toUpperCase()})</h3>
+                      <div className="mb-12">
+                         <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-6">Disponibilidade do Dia ({selectedRes.date.toUpperCase()})</h3>
                          
-                         <div className="w-full h-8 bg-green-50 rounded-lg overflow-hidden flex relative border border-green-500/10">
+                         <div className="w-full h-10 bg-green-50/50 rounded-xl overflow-hidden flex relative border-2 border-green-500/10">
                             {/* Mocking the yellow block */}
-                            <div className="absolute left-[35%] w-[25%] h-full bg-yellow-400 flex items-center justify-center">
-                               <span className="text-[10px] font-bold text-white uppercase tracking-wider">Solicitado</span>
+                            <div className="absolute left-[30%] w-[30%] h-full bg-[#FFC107] flex items-center justify-center">
+                               <span className="text-[11px] font-bold text-white uppercase tracking-wider shadow-sm">Solicitado</span>
                             </div>
                          </div>
-                         <div className="flex justify-between mt-2 px-1">
-                            <span className="text-[10px] text-muted-foreground font-medium">06:00</span>
-                            <span className="text-[10px] text-muted-foreground font-medium">10:00</span>
-                            <span className="text-[10px] text-brand font-bold">12:00</span>
-                            <span className="text-[10px] text-brand font-bold">14:00</span>
-                            <span className="text-[10px] text-muted-foreground font-medium">16:00</span>
-                            <span className="text-[10px] text-muted-foreground font-medium">18:00</span>
-                            <span className="text-[10px] text-muted-foreground font-medium">20:00</span>
-                            <span className="text-[10px] text-muted-foreground font-medium">22:00</span>
+                         <div className="flex justify-between mt-3 px-2">
+                            <span className="text-[11px] text-muted-foreground font-medium">06:00</span>
+                            <span className="text-[11px] text-muted-foreground font-medium">10:00</span>
+                            <span className="text-[11px] text-brand font-bold">12:00</span>
+                            <span className="text-[11px] text-brand font-bold">14:00</span>
+                            <span className="text-[11px] text-muted-foreground font-medium">16:00</span>
+                            <span className="text-[11px] text-muted-foreground font-medium">18:00</span>
+                            <span className="text-[11px] text-muted-foreground font-medium">20:00</span>
+                            <span className="text-[11px] text-muted-foreground font-medium">22:00</span>
                          </div>
                       </div>
     
                       {/* Rule Blocks */}
-                      <div className="flex flex-wrap gap-4 mb-10">
-                         <div className="flex-1 min-w-[150px] bg-accent/40 rounded-xl p-4 text-center">
-                           <p className="text-xs text-muted-foreground mb-1 font-medium">Capacidade</p>
-                           <p className="text-lg font-bold text-foreground">{selectedRes.capacity} Pessoas</p>
+                      <div className="flex flex-wrap gap-6 mb-14">
+                         <div className="flex-1 min-w-[200px] bg-[#f8f9fa] rounded-2xl p-6 text-center border border-slate-100">
+                           <p className="text-[11px] text-muted-foreground mb-2 font-bold uppercase tracking-wider">Capacidade</p>
+                           <p className="text-xl font-bold text-foreground">{selectedRes.capacity} Pessoas</p>
                          </div>
-                         <div className="flex-1 min-w-[150px] bg-accent/40 rounded-xl p-4 text-center">
-                           <p className="text-xs text-muted-foreground mb-1 font-medium">Taxa de Limpeza</p>
-                           <p className="text-lg font-bold text-foreground">{selectedRes.cleaningFee}</p>
+                         <div className="flex-1 min-w-[200px] bg-[#f8f9fa] rounded-2xl p-6 text-center border border-slate-100">
+                           <p className="text-[11px] text-muted-foreground mb-2 font-bold uppercase tracking-wider">Taxa de Limpeza</p>
+                           <p className="text-xl font-bold text-foreground">{selectedRes.cleaningFee}</p>
                          </div>
-                         <div className="flex-1 min-w-[150px] bg-accent/40 rounded-xl p-4 text-center">
-                           <p className="text-xs text-muted-foreground mb-1 font-medium">Regra Específica</p>
-                           <p className="text-lg font-bold text-foreground">{selectedRes.specificRule}</p>
+                         <div className="flex-1 min-w-[200px] bg-[#f8f9fa] rounded-2xl p-6 text-center border border-slate-100">
+                           <p className="text-[11px] text-muted-foreground mb-2 font-bold uppercase tracking-wider">Regra Específica</p>
+                           <p className="text-xl font-bold text-foreground">{selectedRes.specificRule}</p>
                          </div>
                       </div>
     
                       {/* Other Reservations */}
-                      <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-                         <Clock size={12} /> Outras Reservas no Dia ({selectedRes.date.toUpperCase()})
+                      <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-6 flex items-center gap-2">
+                         <Clock size={14} /> Outras Reservas no Dia ({selectedRes.date.toUpperCase()})
                       </h3>
-                      <div className="space-y-3">
-                         <div className="flex justify-between items-center p-4 border border-border/50 rounded-xl bg-card">
+                      <div className="space-y-4">
+                         <div className="flex justify-between items-center p-5 border-2 border-slate-100 rounded-2xl bg-gray-blue-100 shadow-sm">
                            <div>
-                             <h4 className="font-bold text-sm text-foreground mb-1">Salão de Festas</h4>
-                             <p className="text-xs text-muted-foreground">19:00 - 23:00 • Apt 501</p>
+                             <h4 className="font-bold text-base text-foreground mb-1.5">Salão de Festas</h4>
+                             <p className="text-[13px] text-muted-foreground font-medium">19:00 - 23:00 • Apt 501</p>
                            </div>
-                           <StatusBadge status="Confirmado" />
+                           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-bold uppercase tracking-wider text-green-600 border border-green-200"><span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>Confirmado</span>
                          </div>
-                         <div className="flex justify-between items-center p-4 border border-border/50 rounded-xl bg-card">
+                         <div className="flex justify-between items-center p-5 border-2 border-slate-100 rounded-2xl bg-gray-blue-100 shadow-sm">
                            <div>
-                             <h4 className="font-bold text-sm text-foreground mb-1">Academia</h4>
-                             <p className="text-xs text-muted-foreground">07:00 - 08:00 • Apt 102</p>
+                             <h4 className="font-bold text-base text-foreground mb-1.5">Academia</h4>
+                             <p className="text-[13px] text-muted-foreground font-medium">07:00 - 08:00 • Apt 102</p>
                            </div>
-                           <StatusBadge status="Concluído" />
+                           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-bold uppercase tracking-wider text-muted-foreground border border-border"><span className="w-1.5 h-1.5 rounded-full bg-muted-foreground"></span>Concluído</span>
                          </div>
                       </div>
                     </>
                   ) : (
-                    <div className="h-full flex flex-col items-center justify-center text-center p-12 opacity-50">
-                      <CalendarIcon size={48} className="mb-4 text-muted-foreground" />
-                      <h3 className="text-lg font-bold">Selecione uma Reserva</h3>
-                      <p className="text-sm">Escolha uma reserva na lista para visualizar os detalhes e o solicitante.</p>
+                    <div className="h-full flex flex-col items-center justify-center text-center p-12">
+                      <div className="w-16 h-16 rounded-full bg-accent text-muted-foreground flex items-center justify-center mb-4">
+                        <CalendarIcon size={32} />
+                      </div>
+                      <p className="text-sm text-muted-foreground">Selecione uma reserva para visualizar detalhes</p>
                     </div>
                   )}
                 </div>
@@ -334,7 +363,7 @@ export function Reservations() {
                     </div>
   
                     <div className="flex gap-2 mb-6">
-                       <span className="px-2 py-1 bg-accent rounded text-[10px] font-bold text-muted-foreground">Proprietário</span>
+                       <span className="px-2 py-1 bg-brand/10 text-brand rounded text-[10px] font-bold">Proprietário</span>
                        <span className={`px-2 py-1 rounded text-[10px] font-bold ${selectedRes.requesterStatus === 'Adimplente' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                          {selectedRes.requesterStatus}
                        </span>
@@ -382,12 +411,13 @@ export function Reservations() {
                        </div>
                     </div>
   
-                    <button className="w-full mt-6 px-4 py-2.5 bg-background border border-border rounded-lg text-sm font-semibold text-foreground hover:bg-accent hover:text-brand transition-colors shadow-sm">
+                    <button className="w-full mt-6 px-4 py-2.5 bg-background border cursor-pointer border-border rounded-lg text-sm font-semibold text-foreground hover:bg-accent hover:text-brand transition-colors shadow-sm">
                        Ver Perfil Completo
                     </button>
                  </div>
               </div>
             )}
+            
           </>
         ) : (
           <div className="flex-1 overflow-y-auto">

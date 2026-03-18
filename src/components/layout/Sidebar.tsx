@@ -38,7 +38,7 @@ export function Sidebar({ activeItem, onNavigate }: SidebarProps) {
               title={item.label}
               onClick={() => onNavigate?.(item.id)}
               className={`
-                relative w-10 h-10 rounded-lg flex items-center justify-center
+                relative w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer
                 transition-all duration-150 group
                 ${isActive
                   ? 'bg-sidebar-active-bg text-sidebar-active-fg'
