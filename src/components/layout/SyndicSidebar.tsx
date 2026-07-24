@@ -3,6 +3,7 @@ import { Home, Users, PieChart, Wrench, Calendar, LogOut } from 'lucide-react';
 interface SyndicSidebarProps {
   activeItem: string;
   onNavigate?: (id: string) => void;
+  onLogout?: () => void;
 }
 
 const topMenuItems = [
@@ -13,7 +14,7 @@ const topMenuItems = [
   { id: 'reservations', icon: Calendar, label: 'Reservas' },
 ];
 
-export function SyndicSidebar({ activeItem, onNavigate }: SyndicSidebarProps) {
+export function SyndicSidebar({ activeItem, onNavigate, onLogout }: SyndicSidebarProps) {
   return (
     <>
       {/* Desktop Sidebar */}
@@ -67,7 +68,7 @@ export function SyndicSidebar({ activeItem, onNavigate }: SyndicSidebarProps) {
         <div className="mt-auto flex flex-col items-center gap-1 w-full pt-4 border-t border-sidebar-border/50">
           <button
             title="Sair"
-            onClick={() => console.log('Logout')}
+            onClick={onLogout}
             className="
             relative w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer
             transition-all duration-150 group text-sidebar-icon hover:bg-sidebar-accent hover:text-destructive
