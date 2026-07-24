@@ -45,7 +45,7 @@ export function FinancialTransparency() {
           {/* Top Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
             <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-blue-50 text-brand flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0">
                 <Wallet size={24} />
               </div>
               <div>
@@ -54,7 +54,7 @@ export function FinancialTransparency() {
               </div>
             </div>
             <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-full bg-success/10 text-success flex items-center justify-center shrink-0">
                 <TrendingUp size={24} />
               </div>
               <div>
@@ -63,7 +63,7 @@ export function FinancialTransparency() {
               </div>
             </div>
             <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center shrink-0">
                 <TrendingDown size={24} />
               </div>
               <div>
@@ -144,7 +144,7 @@ export function FinancialTransparency() {
                   <span>R$ 50k / 100k</span>
                 </div>
                 <div className="w-full bg-black/20 rounded-full h-2">
-                  <div className="bg-yellow-400 h-2 rounded-full" style={{ width: '50%' }}></div>
+                  <div className="bg-warning h-2 rounded-full" style={{ width: '50%' }}></div>
                 </div>
               </div>
             </div>
@@ -156,7 +156,7 @@ export function FinancialTransparency() {
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-                <AlertTriangle size={18} className="text-red-500" />
+                <AlertTriangle size={18} className="text-destructive" />
                 Inadimplência
               </h3>
               <button className="text-xs font-semibold text-muted-foreground hover:text-foreground">Ver Relatório</button>
@@ -174,14 +174,14 @@ export function FinancialTransparency() {
                       <p className="text-xs text-muted-foreground">{item.days}</p>
                     </div>
                   </div>
-                  <span className="text-sm font-bold text-red-600">{item.value}</span>
+                  <span className="text-sm font-bold text-destructive">{item.value}</span>
                 </div>
               ))}
             </div>
 
             <div className="mt-4 pt-4 border-t border-border flex justify-between items-center">
               <span className="text-sm text-muted-foreground font-medium">Total Pendente</span>
-              <span className="text-base font-bold text-red-600">R$ 4.630,00</span>
+              <span className="text-base font-bold text-destructive">R$ 4.630,00</span>
             </div>
           </div>
 

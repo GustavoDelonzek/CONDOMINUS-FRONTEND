@@ -50,7 +50,7 @@ export function DashboardAdminCompany() {
                         value="1,248"
                         trend="12%"
                         trendLabel="vs last month"
-                        iconBg="bg-blue-50"
+                        iconBg="bg-brand/10"
                         icon={<Building2 className="w-6 h-6 text-brand" />}
                     />
                     <MetricCard
@@ -58,16 +58,16 @@ export function DashboardAdminCompany() {
                         value="892"
                         trend="99.8%"
                         trendLabel="Uptime"
-                        iconBg="bg-green-50"
-                        icon={<MessageSquare className="w-6 h-6 text-green-500" />}
+                        iconBg="bg-success/10"
+                        icon={<MessageSquare className="w-6 h-6 text-success" />}
                     />
                     <MetricCard
                         label="Total MRR"
                         value="$145.2k"
                         trend="8.5%"
                         trendLabel="growth"
-                        iconBg="bg-yellow-50"
-                        icon={<DollarSign className="w-6 h-6 text-yellow-500" />}
+                        iconBg="bg-warning/10"
+                        icon={<DollarSign className="w-6 h-6 text-warning" />}
                     />
                 </div>
 

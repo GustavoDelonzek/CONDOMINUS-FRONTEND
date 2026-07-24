@@ -125,16 +125,16 @@ const MOCK_TICKETS: Ticket[] = [
 // --- Badges ---
 function StatusBadge({ status }: { status: TicketStatus }) {
   if (status === 'Novo') {
-    return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-brand border border-brand/20"><span className="w-1.5 h-1.5 rounded-full bg-brand"></span>Novo</span>;
+    return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-brand/10 text-brand border border-brand/20"><span className="w-1.5 h-1.5 rounded-full bg-brand"></span>Novo</span>;
   }
-  return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-yellow-50 text-yellow-600 border border-yellow-500/20"><span className="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>Pendente</span>;
+  return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-500/20"><span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Pendente</span>;
 }
 
 function PriorityBadge({ priority }: { priority: Priority }) {
   const styles = {
     'Alta': 'bg-red-50 text-red-500 border border-red-500/20',
-    'Média': 'bg-yellow-50 text-yellow-600 border border-yellow-500/20',
-    'Baixa': 'bg-green-50 text-green-600 border border-green-500/20',
+    'Média': 'bg-amber-50 text-amber-600 border border-amber-500/20',
+    'Baixa': 'bg-emerald-50 text-emerald-600 border border-emerald-500/20',
   };
   return <span className={`inline-block px-3 py-1 rounded-lg text-xs font-bold ${styles[priority]}`}>{priority}</span>;
 }

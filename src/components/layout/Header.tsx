@@ -20,7 +20,7 @@ export function Header({
                     <p className="text-sm font-bold text-foreground">{userName}</p>
                     <p className="text-xs text-muted-foreground">{userRole}</p>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+                <div className="w-10 h-10 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-brand font-bold text-sm">
                     {userInitials}
                 </div>
             </div>

@@ -2,6 +2,11 @@ import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { DashboardAdminCompany } from './pages/DashboardAdminCompany';
+import { Condominiums } from './pages/admin/Condominiums';
+import { AdminUsers } from './pages/admin/AdminUsers';
+import { Documents } from './pages/admin/Documents';
+import { Billing } from './pages/admin/Billing';
+import { Settings } from './pages/admin/Settings';
 import { SyndicSidebar } from './components/layout/SyndicSidebar';
 import { SyndicHeader } from './components/layout/SyndicHeader';
 import { SyndicDashboard } from './pages/SyndicDashboard';
@@ -17,7 +22,11 @@ function AdminLayout() {
 
   const handleNavigate = (id: string) => {
     if (id === 'dashboard') navigate('/admin/dashboard');
-    // other admin routes would go here
+    if (id === 'condos') navigate('/admin/condos');
+    if (id === 'users') navigate('/admin/users');
+    if (id === 'documents') navigate('/admin/documents');
+    if (id === 'billing') navigate('/admin/billing');
+    if (id === 'settings') navigate('/admin/settings');
   };
 
   const adminPageTitles: Record<string, string> = {
@@ -37,6 +46,11 @@ function AdminLayout() {
         <div className="flex-1 overflow-y-auto">
           <Routes>
             <Route path="dashboard" element={<DashboardAdminCompany />} />
+            <Route path="condos" element={<Condominiums />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="documents" element={<Documents />} />
+            <Route path="billing" element={<Billing />} />
+            <Route path="settings" element={<Settings />} />
             {/* fallback within admin */}
             <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Routes>

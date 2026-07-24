@@ -34,7 +34,7 @@ export function MetricCard({
             </div>
 
             <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <span className="text-green-600 font-semibold">↑ {trend}</span>
+                <span className="text-success font-semibold">↑ {trend}</span>
                 {trendLabel}
             </p>
         </div>

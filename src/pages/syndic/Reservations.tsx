@@ -103,10 +103,10 @@ const MOCK_RESERVATIONS: Reservation[] = [
 // --- Badges ---
 function StatusBadge({ status }: { status: ReservationStatus }) {
   if (status === 'Aguardando Aprovação') {
-    return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-yellow-600 border border-yellow-200"><span className="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>Pendentes</span>;
+    return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-amber-600 border border-amber-200"><span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Pendentes</span>;
   }
   if (status === 'Confirmado') {
-     return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-green-600 border border-green-200"><span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>Confirmado</span>;
+     return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-emerald-600 border border-emerald-200"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Confirmado</span>;
   }
   if (status === 'Recusado') {
      return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-brand border border-brand/20"><span className="w-1.5 h-1.5 rounded-full bg-brand"></span>Novo</span>;
@@ -142,7 +142,7 @@ export function Reservations() {
           </button>
           <button className="text-muted-foreground hover:text-foreground cursor-pointer relative">
             <Bell size={20} />
-            <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-card"></span>
+            <span className="absolute top-0 right-0 w-2 h-2 bg-destructive rounded-full border-2 border-card"></span>
           </button>
         </div>
       </div>
@@ -230,7 +230,7 @@ export function Reservations() {
                 &lsaquo; Voltar
               </button>
 
-              <div className="flex-1 overflow-y-auto p-6 md:p-8 lg:p-12 custom-scrollbar bg-gray-blue-100">
+              <div className="flex-1 overflow-y-auto p-6 md:p-8 lg:p-12 custom-scrollbar bg-background">
                 <div className="w-full">
                   {selectedRes ? (
                     <>
@@ -244,10 +244,10 @@ export function Reservations() {
                             <button className="text-sm font-bold cursor-pointer text-muted-foreground hover:text-foreground transition-colors mr-2">
                               Enviar Mensagem
                             </button>
-                            <button className="w-11 h-11 flex cursor-pointer items-center justify-center bg-gray-blue-100 border border-red-400 text-red-500 rounded-xl hover:bg-red-50 transition-colors">
+                            <button className="w-11 h-11 flex cursor-pointer items-center justify-center bg-background border border-destructive/40 text-destructive rounded-xl hover:bg-destructive/10 transition-colors">
                               <span className="text-xl leading-none mb-1">&times;</span>
                             </button>
-                            <button className="px-6 py-2.5 cursor-pointer bg-[#00C853] text-white text-sm font-bold rounded-xl hover:bg-[#00e676] transition-colors flex items-center gap-2 shadow-sm">
+                            <button className="px-6 py-2.5 cursor-pointer bg-success text-white text-sm font-bold rounded-xl hover:bg-success/90 transition-colors flex items-center gap-2 shadow-sm">
                               <span className="text-base leading-none">&#10003;</span> Aprovar
                             </button>
                          </div>
@@ -255,7 +255,7 @@ export function Reservations() {
     
                       {/* Date / Time Cards */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                         <div className="bg-gray-blue-100 border-2 border-slate-100 rounded-2xl p-6 flex items-center gap-5 shadow-sm">
+                         <div className="bg-background border-2 border-slate-100 rounded-2xl p-6 flex items-center gap-5 shadow-sm">
                             <div className="w-12 h-12 rounded-full bg-brand/5 text-brand flex items-center justify-center shrink-0">
                               <CalendarIcon size={24} strokeWidth={1.5} />
                             </div>
@@ -264,7 +264,7 @@ export function Reservations() {
                               <p className="text-base font-bold text-foreground">{selectedRes.date}</p>
                             </div>
                          </div>
-                         <div className="bg-gray-blue-100 border-2 border-slate-100 rounded-2xl p-6 flex items-center gap-5 shadow-sm">
+                         <div className="bg-background border-2 border-slate-100 rounded-2xl p-6 flex items-center gap-5 shadow-sm">
                             <div className="w-12 h-12 rounded-full bg-brand/5 text-brand flex items-center justify-center shrink-0">
                               <Clock size={24} strokeWidth={1.5} />
                             </div>
@@ -279,9 +279,9 @@ export function Reservations() {
                       <div className="mb-12">
                          <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-6">Disponibilidade do Dia ({selectedRes.date.toUpperCase()})</h3>
                          
-                         <div className="w-full h-10 bg-green-50/50 rounded-xl overflow-hidden flex relative border-2 border-green-500/10">
+                         <div className="w-full h-10 bg-success/10 rounded-xl overflow-hidden flex relative border-2 border-success/20">
                             {/* Mocking the yellow block */}
-                            <div className="absolute left-[30%] w-[30%] h-full bg-[#FFC107] flex items-center justify-center">
+                            <div className="absolute left-[30%] w-[30%] h-full bg-warning flex items-center justify-center">
                                <span className="text-[11px] font-bold text-white uppercase tracking-wider shadow-sm">Solicitado</span>
                             </div>
                          </div>
@@ -299,15 +299,15 @@ export function Reservations() {
     
                       {/* Rule Blocks */}
                       <div className="flex flex-wrap gap-6 mb-14">
-                         <div className="flex-1 min-w-[200px] bg-[#f8f9fa] rounded-2xl p-6 text-center border border-slate-100">
+                         <div className="flex-1 min-w-[200px] bg-accent/30 rounded-2xl p-6 text-center border border-slate-100">
                            <p className="text-[11px] text-muted-foreground mb-2 font-bold uppercase tracking-wider">Capacidade</p>
                            <p className="text-xl font-bold text-foreground">{selectedRes.capacity} Pessoas</p>
                          </div>
-                         <div className="flex-1 min-w-[200px] bg-[#f8f9fa] rounded-2xl p-6 text-center border border-slate-100">
+                         <div className="flex-1 min-w-[200px] bg-accent/30 rounded-2xl p-6 text-center border border-slate-100">
                            <p className="text-[11px] text-muted-foreground mb-2 font-bold uppercase tracking-wider">Taxa de Limpeza</p>
                            <p className="text-xl font-bold text-foreground">{selectedRes.cleaningFee}</p>
                          </div>
-                         <div className="flex-1 min-w-[200px] bg-[#f8f9fa] rounded-2xl p-6 text-center border border-slate-100">
+                         <div className="flex-1 min-w-[200px] bg-accent/30 rounded-2xl p-6 text-center border border-slate-100">
                            <p className="text-[11px] text-muted-foreground mb-2 font-bold uppercase tracking-wider">Regra Específica</p>
                            <p className="text-xl font-bold text-foreground">{selectedRes.specificRule}</p>
                          </div>
@@ -318,14 +318,14 @@ export function Reservations() {
                          <Clock size={14} /> Outras Reservas no Dia ({selectedRes.date.toUpperCase()})
                       </h3>
                       <div className="space-y-4">
-                         <div className="flex justify-between items-center p-5 border-2 border-slate-100 rounded-2xl bg-gray-blue-100 shadow-sm">
+                         <div className="flex justify-between items-center p-5 border-2 border-slate-100 rounded-2xl bg-background shadow-sm">
                            <div>
                              <h4 className="font-bold text-base text-foreground mb-1.5">Salão de Festas</h4>
                              <p className="text-[13px] text-muted-foreground font-medium">19:00 - 23:00 • Apt 501</p>
                            </div>
-                           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-bold uppercase tracking-wider text-green-600 border border-green-200"><span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>Confirmado</span>
+                           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-bold uppercase tracking-wider text-emerald-600 border border-emerald-200"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Confirmado</span>
                          </div>
-                         <div className="flex justify-between items-center p-5 border-2 border-slate-100 rounded-2xl bg-gray-blue-100 shadow-sm">
+                         <div className="flex justify-between items-center p-5 border-2 border-slate-100 rounded-2xl bg-background shadow-sm">
                            <div>
                              <h4 className="font-bold text-base text-foreground mb-1.5">Academia</h4>
                              <p className="text-[13px] text-muted-foreground font-medium">07:00 - 08:00 • Apt 102</p>
@@ -364,7 +364,7 @@ export function Reservations() {
   
                     <div className="flex gap-2 mb-6">
                        <span className="px-2 py-1 bg-brand/10 text-brand rounded text-[10px] font-bold">Proprietário</span>
-                       <span className={`px-2 py-1 rounded text-[10px] font-bold ${selectedRes.requesterStatus === 'Adimplente' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                       <span className={`px-2 py-1 rounded text-[10px] font-bold ${selectedRes.requesterStatus === 'Adimplente' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
                          {selectedRes.requesterStatus}
                        </span>
                     </div>
@@ -400,7 +400,7 @@ export function Reservations() {
                        </div>
                        <div className="flex justify-between items-center text-sm">
                           <span className="text-muted-foreground font-medium">Multas/Infrações</span>
-                          <span className={`font-bold ${selectedRes.infractions === 'Nenhuma' ? 'text-green-500' : 'text-red-500'}`}>{selectedRes.infractions}</span>
+                          <span className={`font-bold ${selectedRes.infractions === 'Nenhuma' ? 'text-emerald-500' : 'text-red-500'}`}>{selectedRes.infractions}</span>
                        </div>
                     </div>
   

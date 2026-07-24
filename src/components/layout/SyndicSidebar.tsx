@@ -70,7 +70,7 @@ export function SyndicSidebar({ activeItem, onNavigate }: SyndicSidebarProps) {
             onClick={() => console.log('Logout')}
             className="
             relative w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer
-            transition-all duration-150 group text-sidebar-icon hover:bg-sidebar-accent hover:text-red-500
+            transition-all duration-150 group text-sidebar-icon hover:bg-sidebar-accent hover:text-destructive
           "
           >
             <LogOut size={20} strokeWidth={1.75} />

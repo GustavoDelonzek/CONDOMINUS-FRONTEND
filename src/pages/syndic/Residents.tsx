@@ -88,7 +88,7 @@ function Badge({ variant, children }: { variant: 'Proprietário' | 'Inquilino' |
     const styles = {
         'Proprietário': 'bg-blue-50 text-blue-600',
         'Inquilino': 'bg-purple-50 text-purple-600',
-        'Ativo': 'bg-green-50 text-green-600',
+        'Ativo': 'bg-emerald-50 text-emerald-600',
         'Bloqueado': 'bg-red-50 text-red-600',
     };
 

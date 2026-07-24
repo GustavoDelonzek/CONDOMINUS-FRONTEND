@@ -14,13 +14,13 @@ interface SyndicStatCardProps {
 
 export function SyndicStatCard({
     icon,
-    iconBgClass = 'bg-blue-50',
-    iconColorClass = 'text-blue-600',
+    iconBgClass = 'bg-info/10',
+    iconColorClass = 'text-info',
     topRightElement,
     label,
     value,
     subValue,
-    barColorClass = 'bg-blue-600',
+    barColorClass = 'bg-info',
     barWidth = 'w-full',
 }: SyndicStatCardProps) {
     return (

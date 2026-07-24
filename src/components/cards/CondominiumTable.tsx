@@ -31,8 +31,8 @@ const PLAN_STYLES: Record<PlanType, string> = {
 };
 
 const STATUS_STYLES: Record<ApiStatus, { dot: string; text: string }> = {
-    Connected: { dot: 'bg-green-500', text: 'text-green-600' },
-    Disconnected: { dot: 'bg-red-500', text: 'text-destructive' },
+    Connected: { dot: 'bg-success', text: 'text-success' },
+    Disconnected: { dot: 'bg-destructive', text: 'text-destructive' },
 };
 
 function InitialsAvatar({ initials, color }: { initials: string; color: string }) {

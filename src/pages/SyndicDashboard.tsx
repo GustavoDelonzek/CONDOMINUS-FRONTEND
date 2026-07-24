@@ -31,38 +31,38 @@ export function SyndicDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <SyndicStatCard
                 icon={<DollarSign size={20} />}
-                iconBgClass="bg-green-100"
-                iconColorClass="text-green-600"
-                topRightElement={<span className="text-green-600 font-bold text-sm">~ +12%</span>}
+                iconBgClass="bg-success/10"
+                iconColorClass="text-success"
+                topRightElement={<span className="text-success font-bold text-sm">~ +12%</span>}
                 label="Arrecadação Mensal"
                 value="R$ 42.500"
-                barColorClass="bg-green-500"
+                barColorClass="bg-success"
                 barWidth="w-full"
             />
              <SyndicStatCard
                 icon={<AlertCircle size={20} />}
-                iconBgClass="bg-orange-100"
-                iconColorClass="text-orange-600"
-                topRightElement={<span className="text-orange-500 font-bold text-xs bg-orange-100 px-2 py-1 rounded-md">Atenção</span>}
+                iconBgClass="bg-warning/10"
+                iconColorClass="text-warning"
+                topRightElement={<span className="text-warning font-bold text-xs bg-warning/10 px-2 py-1 rounded-md">Atenção</span>}
                 label="Chamados Abertos"
                 value="8"
                 subValue="pendentes"
-                barColorClass="bg-orange-400"
+                barColorClass="bg-warning"
                 barWidth="w-1/3"
             />
             <SyndicStatCard
                 icon={<Users size={20} />}
-                iconBgClass="bg-blue-100"
-                iconColorClass="text-blue-600"
+                iconBgClass="bg-info/10"
+                iconColorClass="text-info"
                 label="Ocupação"
                 value="94%"
                 subValue="47/50 unidades"
-                barColorClass="bg-blue-600"
+                barColorClass="bg-info"
                 barWidth="w-[94%]"
             />
              <SyndicStatCard
                 icon={<Package size={20} />}
-                iconBgClass="bg-blue-50"
+                iconBgClass="bg-brand/10"
                 iconColorClass="text-brand"
                 label="Entregas Recebidas"
                 value="14"
@@ -99,7 +99,7 @@ export function SyndicDashboard() {
                     <div className="flex-1">
                         <div className="flex justify-between items-start">
                              <p className="font-semibold text-foreground">Fernanda Lima <span className="text-muted-foreground font-normal text-sm">Ap. 304</span></p>
-                            <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded">Acesso</span>
+                            <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">Acesso</span>
                         </div>
                         <p className="text-sm text-muted-foreground mt-1">Registrou um visitante: Pedro Alcantara.</p>
                         <span className="text-xs text-muted-foreground mt-2 block">45 min atrás</span>
@@ -131,13 +131,13 @@ export function SyndicDashboard() {
           {/* Quick Actions */}
           <div className="grid grid-cols-2 gap-4">
               <button className="bg-card border border-border rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-accent hover:border-brand/30 transition-all shadow-sm group">
-                  <div className="w-10 h-10 rounded-lg bg-blue-50 text-brand flex items-center justify-center group-hover:bg-brand group-hover:text-white transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-brand/10 text-brand flex items-center justify-center group-hover:bg-brand group-hover:text-white transition-colors">
                       <Bell size={20} />
                   </div>
                   <span className="text-xs font-semibold text-foreground text-center">Novo Aviso</span>
               </button>
-              <button className="bg-card border border-border rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-accent hover:border-green-600/30 transition-all shadow-sm group">
-                  <div className="w-10 h-10 rounded-lg bg-green-50 text-green-600 flex items-center justify-center group-hover:bg-green-600 group-hover:text-white transition-colors">
+              <button className="bg-card border border-border rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-accent hover:border-success/30 transition-all shadow-sm group">
+                  <div className="w-10 h-10 rounded-lg bg-success/10 text-success flex items-center justify-center group-hover:bg-success group-hover:text-white transition-colors">
                       <UserPlus size={20} />
                   </div>
                   <span className="text-xs font-semibold text-foreground text-center">Cadastrar Visitante</span>
@@ -146,10 +146,10 @@ export function SyndicDashboard() {
 
           {/* Active Announcements */}
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex-1">
-              <h3 className="text-md font-bold text-foreground border-l-4 border-yellow-400 pl-3 mb-4">Comunicados Ativos</h3>
-              
+              <h3 className="text-md font-bold text-foreground border-l-4 border-warning pl-3 mb-4">Comunicados Ativos</h3>
+
               <div className="bg-red-50 border border-red-100 rounded-xl p-4">
-                  <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Urgente</span>
+                  <span className="bg-destructive text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Urgente</span>
                   <h4 className="font-bold text-red-900 mt-2">Manutenção no Elevador Social</h4>
                   <p className="text-xs text-red-700 mt-1 mb-2 font-medium">Postado hoje, às 08:00</p>
                   <p className="text-sm text-red-800 leading-relaxed mb-3">

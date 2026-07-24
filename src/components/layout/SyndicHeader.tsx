@@ -71,7 +71,7 @@ export function SyndicHeader({
 
                 <button className="text-muted-foreground hover:text-foreground relative p-1">
                     <Bell size={18} className="md:w-5 md:h-5" />
-                    <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full border-2 border-card"></span>
+                    <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-destructive rounded-full border-2 border-card"></span>
                 </button>
             </div>
         </header>
