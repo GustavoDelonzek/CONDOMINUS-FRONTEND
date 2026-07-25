@@ -6,7 +6,7 @@ import { ApiError } from '../../services/apiClient';
 import { StepIndicator } from '../../components/ui/StepIndicator';
 
 export function Login() {
-  const { login } = useAuth();
+  const { login, sessionExpired } = useAuth();
   const { clearActiveCondo } = useCondo();
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,9 +28,6 @@ export function Login() {
     setError('');
     try {
       await login(email, password);
-      // Todo login pelo formulário força escolher o condomínio de novo — mesmo que a
-      // membership seja a mesma de antes, mesmo com só uma opção. A escolha só persiste
-      // durante uma sessão contínua (refresh de página), não entre logins novos.
       clearActiveCondo();
       const redirectTo = (location.state as { from?: Location } | null)?.from?.pathname ?? '/';
       navigate(redirectTo, { replace: true });
@@ -65,6 +62,12 @@ export function Login() {
               Gerencie condomínios, moradores e ocorrências em um só lugar.
             </p>
           </div>
+
+          {sessionExpired && (
+            <div className="bg-warning/10 border border-warning/20 text-warning text-sm rounded-lg px-4 py-3 mb-5 text-center">
+              Sua sessão expirou. Faça login novamente.
+            </div>
+          )}
 
           <form
             onSubmit={handleSubmit}

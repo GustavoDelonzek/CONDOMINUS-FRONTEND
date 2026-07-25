@@ -1,6 +1,5 @@
 import { Plus, Upload, Wallet, TrendingUp, TrendingDown, FileText, Download, AlertTriangle } from 'lucide-react';
 
-// Mock Data
 const RECENT_FILES = [
   { id: '1', title: 'Balancete Jan/2026', date: 'Adicionado em 02 fev 2026', size: '2.4 MB', type: 'pdf', iconColor: 'text-red-500', bgColor: 'bg-red-50' },
   { id: '2', title: 'Balancete Dez/2025', date: 'Adicionado em 05 Jan 2026', size: '2.1 MB', type: 'pdf', iconColor: 'text-red-500', bgColor: 'bg-red-50' },
@@ -25,7 +24,6 @@ export function FinancialTransparency() {
   return (
     <div className="flex flex-col gap-4 md:gap-6 h-full p-4 md:p-6 bg-background overflow-y-auto custom-scrollbar">
       
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Transparência Financeira</h1>
@@ -39,10 +37,8 @@ export function FinancialTransparency() {
 
       <div className="flex flex-col xl:flex-row gap-6">
         
-        {/* Left/Main Column */}
         <div className="flex-1 flex flex-col gap-6">
           
-          {/* Top Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
             <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0">
@@ -73,7 +69,6 @@ export function FinancialTransparency() {
             </div>
           </div>
 
-          {/* Upload Area */}
           <div className="bg-card border-2 border-dashed border-border rounded-2xl p-10 flex flex-col items-center justify-center text-center hover:bg-accent/30 transition-colors">
             <div className="w-14 h-14 rounded-full bg-brand/10 text-brand flex items-center justify-center mb-4">
               <Upload size={28} />
@@ -85,7 +80,6 @@ export function FinancialTransparency() {
             </button>
           </div>
 
-          {/* Tabs */}
           <div className="flex overflow-x-auto gap-2 text-sm font-medium pb-1 custom-scrollbar">
             <button className="px-4 py-2 rounded-full bg-brand/10 text-brand font-bold whitespace-nowrap">Todos</button>
             <button className="px-4 py-2 rounded-full hover:bg-accent text-muted-foreground whitespace-nowrap transition-colors">Balancetes 2024</button>
@@ -94,7 +88,6 @@ export function FinancialTransparency() {
             <button className="px-4 py-2 rounded-full hover:bg-accent text-muted-foreground whitespace-nowrap transition-colors">Notas Fiscais</button>
           </div>
 
-          {/* Recent Files */}
           <div>
             <h3 className="text-lg font-bold text-foreground border-l-4 border-brand pl-3 mb-4">Arquivos Recentes</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -119,10 +112,8 @@ export function FinancialTransparency() {
           </div>
         </div>
 
-        {/* Right Sidebar */}
         <div className="w-full xl:w-96 flex flex-col gap-6 shrink-0">
           
-          {/* Financial Status Blue Card */}
           <div className="bg-brand rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
             <div className="relative z-10">
               <h3 className="text-lg font-bold mb-1">Status Financeiro</h3>
@@ -148,11 +139,9 @@ export function FinancialTransparency() {
                 </div>
               </div>
             </div>
-            {/* Decorative circle */}
             <div className="absolute -right-16 -top-16 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
           </div>
 
-          {/* Overdue/Inadimplência */}
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-base font-bold text-foreground flex items-center gap-2">
@@ -185,7 +174,6 @@ export function FinancialTransparency() {
             </div>
           </div>
 
-          {/* Upcoming Bills */}
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
             <h3 className="text-base font-bold text-foreground mb-6">Próximos Vencimentos</h3>
             

@@ -23,8 +23,6 @@ interface LoginResponse {
   token: string;
 }
 
-// GET /v1/me passa por UserResource::make(...), então vem envolto em `data` — diferente de
-// login/logout, que usam response()->json() puro (ver docs/auth-routes.md).
 interface MeApiResponse {
   status_code: number;
   data: BackendUser & { memberships: BackendMembership[] };

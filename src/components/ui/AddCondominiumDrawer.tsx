@@ -1,11 +1,11 @@
-import { X, Search, Loader2, User, UserSearch } from 'lucide-react';
+import { X, Search, Loader2 } from 'lucide-react';
 import React, { useState } from 'react';
 import { fetchCep } from '../../services/cepService';
 
 interface AddCondominiumDrawerProps {
     open: boolean;
     onClose: () => void;
-    onSubmit?: (data: CondominiumFormData) => void;
+    onSubmit: (data: CondominiumFormData) => Promise<void>;
 }
 
 export interface CondominiumFormData {
@@ -34,7 +34,8 @@ export function AddCondominiumDrawer({ open, onClose, onSubmit }: AddCondominium
     const [form, setForm] = useState<CondominiumFormData>(EMPTY_FORM);
     const [cepLoading, setCepLoading] = useState(false);
     const [cepError, setCepError] = useState<string | null>(null);
-    const [contactSearch, setContactSearch] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     function handleChange(field: keyof CondominiumFormData, value: string) {
         setForm((prev) => ({ ...prev, [field]: value }));
@@ -68,31 +69,36 @@ export function AddCondominiumDrawer({ open, onClose, onSubmit }: AddCondominium
         }
     }
 
-    function handleSubmit() {
-        onSubmit?.(form);
-        setForm(EMPTY_FORM);
-        setContactSearch('');
-        setCepError(null);
-        onClose();
+    async function handleSubmit() {
+        setSubmitting(true);
+        setSubmitError(null);
+        try {
+            await onSubmit(form);
+            setForm(EMPTY_FORM);
+            setCepError(null);
+            onClose();
+        } catch {
+            setSubmitError('Não foi possível criar o condomínio. Tente novamente.');
+        } finally {
+            setSubmitting(false);
+        }
     }
 
     function handleCancel() {
         setForm(EMPTY_FORM);
-        setContactSearch('');
         setCepError(null);
+        setSubmitError(null);
         onClose();
     }
 
     return (
         <>
-            {/* Backdrop */}
             <div
                 className={`fixed inset-0 bg-black/30 z-40 transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
                 onClick={handleCancel}
             />
 
-            {/* Drawer */}
             <aside
                 className={`
                     fixed top-0 right-0 h-full w-[360px] bg-card border-l border-border
@@ -101,7 +107,6 @@ export function AddCondominiumDrawer({ open, onClose, onSubmit }: AddCondominium
                     ${open ? 'translate-x-0' : 'translate-x-full'}
                 `}
             >
-                {/* Header */}
                 <div className="flex items-start justify-between px-6 pt-6 pb-5 border-b border-border">
                     <div>
                         <h2 className="text-base font-semibold text-foreground">Novo Condomínio</h2>
@@ -115,10 +120,8 @@ export function AddCondominiumDrawer({ open, onClose, onSubmit }: AddCondominium
                     </button>
                 </div>
 
-                {/* Form */}
                 <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
 
-                    {/* Condominium Name */}
                     <Field label="Condominium Name">
                         <input
                             type="text"
@@ -129,7 +132,6 @@ export function AddCondominiumDrawer({ open, onClose, onSubmit }: AddCondominium
                         />
                     </Field>
 
-                    {/* CEP */}
                     <Field label="CEP" hint={cepError ?? undefined}>
                         <div className="relative">
                             <input
@@ -152,7 +154,6 @@ export function AddCondominiumDrawer({ open, onClose, onSubmit }: AddCondominium
                         )}
                     </Field>
 
-                    {/* Logradouro + Número */}
                     <div className="grid grid-cols-[1fr_80px] gap-3">
                         <Field label="Logradouro">
                             <input
@@ -174,7 +175,6 @@ export function AddCondominiumDrawer({ open, onClose, onSubmit }: AddCondominium
                         </Field>
                     </div>
 
-                    {/* Bairro */}
                     <Field label="Bairro">
                         <input
                             type="text"
@@ -185,7 +185,6 @@ export function AddCondominiumDrawer({ open, onClose, onSubmit }: AddCondominium
                         />
                     </Field>
 
-                    {/* Cidade + Estado */}
                     <div className="grid grid-cols-[1fr_100px] gap-3">
                         <Field label="Cidade">
                             <input
@@ -210,65 +209,24 @@ export function AddCondominiumDrawer({ open, onClose, onSubmit }: AddCondominium
                         </Field>
                     </div>
 
-                    {/* Primary Contact / Syndicate */}
-                    <div className="mt-2 pt-5 border-t border-border flex flex-col gap-4">
-                        <div className="flex items-center gap-2 text-brand">
-                            <User size={16} strokeWidth={2.5} />
-                            <span className="text-xs font-bold tracking-wider uppercase">Primary Contact / Syndicate</span>
-                        </div>
-                        
-                        <div className="border border-dashed border-border rounded-xl p-4 flex flex-col gap-3">
-                            <h3 className="text-sm font-semibold text-foreground">Assign User</h3>
-                            
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                                    <UserSearch size={16} />
-                                </span>
-                                <input
-                                    type="text"
-                                    placeholder="Search by name or email..."
-                                    value={contactSearch}
-                                    onChange={(e) => setContactSearch(e.target.value)}
-                                    className={`${inputClass} pl-9`}
-                                />
-                            </div>
-
-                            {/* Suggestion Card (Mock) */}
-                            {contactSearch.trim().length > 0 && (
-                                <div className="p-3 bg-card border border-border rounded-lg flex items-center justify-between shadow-sm mt-1">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-sm">
-                                            JD
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-semibold text-foreground">John Doe (Suggested)</p>
-                                            <p className="text-xs text-muted-foreground">john.doe@example.com</p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        className="text-xs font-bold text-brand uppercase tracking-wider hover:opacity-80 transition-opacity"
-                                    >
-                                        Select
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                    {submitError && (
+                        <p className="text-xs text-destructive">{submitError}</p>
+                    )}
 
                 </div>
 
-                {/* Footer */}
                 <div className="px-6 py-4 border-t border-border flex items-center gap-3">
                     <button
                         onClick={handleSubmit}
-                        className="flex-1 py-2.5 bg-brand text-white text-sm font-semibold rounded-lg hover:opacity-90 transition-opacity"
+                        disabled={submitting || !form.name.trim()}
+                        className="flex-1 py-2.5 bg-brand text-white text-sm font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Create Condominium
+                        {submitting ? 'Criando...' : 'Create Condominium'}
                     </button>
                     <button
                         onClick={handleCancel}
-                        className="px-5 py-2.5 border border-border text-sm font-medium text-foreground rounded-lg hover:bg-accent transition-colors"
+                        disabled={submitting}
+                        className="px-5 py-2.5 border border-border text-sm font-medium text-foreground rounded-lg hover:bg-accent transition-colors disabled:opacity-50"
                     >
                         Cancel
                     </button>

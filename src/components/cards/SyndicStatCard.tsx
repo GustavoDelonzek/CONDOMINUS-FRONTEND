@@ -52,7 +52,6 @@ export function SyndicStatCard({
                 )}
             </div>
 
-            {/* Bottom Bar */}
             <div className={`absolute bottom-0 left-6 right-6 h-1 rounded-t-sm ${barColorClass} ${barWidth} max-w-[calc(100%-3rem)]`} />
         </div>
     );

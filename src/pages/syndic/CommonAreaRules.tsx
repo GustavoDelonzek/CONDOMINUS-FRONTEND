@@ -102,14 +102,12 @@ export function CommonAreaRules() {
 
   return (
     <div className="p-4 md:p-8 space-y-8 h-full overflow-y-auto custom-scrollbar">
-      {/* Header Section */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Regras de Áreas Comuns</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Visão geral e edição rápida das configurações de instalações.
         </p>
       </div>
-{/* Actions Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="relative w-full md:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
@@ -134,7 +132,6 @@ export function CommonAreaRules() {
         </div>
       </div>
 
-      {/* Table Container */}
       <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden overflow-x-auto">
         <table className="w-full border-collapse whitespace-nowrap">
           <thead>
@@ -203,7 +200,6 @@ export function CommonAreaRules() {
           </tbody>
         </table>
 
-        {/* Footer */}
         <div className="px-6 py-4 border-t border-border flex items-center justify-between bg-accent/10">
           <p className="text-xs text-muted-foreground">
             Mostrando <span className="font-medium text-foreground">1 a {filteredAreas.length}</span> de{' '}

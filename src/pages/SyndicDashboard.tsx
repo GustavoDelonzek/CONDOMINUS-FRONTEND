@@ -4,9 +4,7 @@ import { SyndicStatCard } from '../components/cards/SyndicStatCard';
 export function SyndicDashboard() {
   return (
     <div className="flex flex-col xl:flex-row gap-6 h-full p-4 md:p-6 bg-background">
-      {/* Main Content Area */}
       <div className="flex-1 flex flex-col gap-6 overflow-y-auto pr-2 custom-scrollbar">
-        {/* Hero Banner */}
         <div className="bg-gradient-to-r from-brand to-purple-600 rounded-2xl p-8 text-white shadow-md relative overflow-hidden">
             <div className="relative z-10">
                 <h2 className="text-3xl font-bold mb-2">Olá, John Smith</h2>
@@ -23,11 +21,9 @@ export function SyndicDashboard() {
                     </div>
                 </div>
             </div>
-            {/* Decorative background circle */}
             <div className="absolute -right-20 -top-20 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <SyndicStatCard
                 icon={<DollarSign size={20} />}
@@ -72,7 +68,6 @@ export function SyndicDashboard() {
             />
         </div>
 
-        {/* Recent Activities */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex-1">
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-bold text-foreground border-l-4 border-brand pl-3">Últimas Atividades</h3>
@@ -80,7 +75,6 @@ export function SyndicDashboard() {
             </div>
             
             <div className="space-y-6">
-                {/* Activity Item */}
                 <div className="flex items-start gap-4 pb-4 border-b border-border last:border-0">
                     <img src="https://i.pravatar.cc/150?u=carlos" alt="User" className="w-10 h-10 rounded-full object-cover" />
                     <div className="flex-1">
@@ -93,7 +87,6 @@ export function SyndicDashboard() {
                     </div>
                 </div>
 
-                 {/* Activity Item */}
                  <div className="flex items-start gap-4 pb-4 border-b border-border last:border-0">
                     <img src="https://i.pravatar.cc/150?u=fernanda" alt="User" className="w-10 h-10 rounded-full object-cover" />
                     <div className="flex-1">
@@ -106,7 +99,6 @@ export function SyndicDashboard() {
                     </div>
                 </div>
 
-                {/* Activity Item */}
                  <div className="flex items-start gap-4 pb-4 border-b border-border last:border-0">
                     <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0">
                         <Package size={20} />
@@ -124,11 +116,7 @@ export function SyndicDashboard() {
         </div>
       </div>
 
-      {/* Right Sidebar Area */}
       <div className="w-full xl:w-80 flex flex-col gap-6 shrink-0">
-
-
-          {/* Quick Actions */}
           <div className="grid grid-cols-2 gap-4">
               <button className="bg-card border border-border rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-accent hover:border-brand/30 transition-all shadow-sm group">
                   <div className="w-10 h-10 rounded-lg bg-brand/10 text-brand flex items-center justify-center group-hover:bg-brand group-hover:text-white transition-colors">
@@ -144,7 +132,6 @@ export function SyndicDashboard() {
               </button>
           </div>
 
-          {/* Active Announcements */}
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex-1">
               <h3 className="text-md font-bold text-foreground border-l-4 border-warning pl-3 mb-4">Comunicados Ativos</h3>
 
@@ -162,5 +149,3 @@ export function SyndicDashboard() {
     </div>
   );
 }
-
-

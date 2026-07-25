@@ -1,6 +1,5 @@
 import { Search, Filter, Download, MoreVertical, Plus } from 'lucide-react';
 
-// --- Mock Data ---
 interface Resident {
     id: string;
     name: string;
@@ -83,7 +82,6 @@ const MOCK_RESIDENTS: Resident[] = [
     },
 ];
 
-// --- Simple Badge Component ---
 function Badge({ variant, children }: { variant: 'Proprietário' | 'Inquilino' | 'Ativo' | 'Bloqueado', children: React.ReactNode }) {
     const styles = {
         'Proprietário': 'bg-blue-50 text-blue-600',
@@ -99,7 +97,6 @@ function Badge({ variant, children }: { variant: 'Proprietário' | 'Inquilino' |
     );
 }
 
-// --- Main Page Component ---
 export function Residents() {
     return (
         <div className="flex flex-col gap-4 md:gap-6 h-full p-4 md:p-6 bg-background">
@@ -107,7 +104,6 @@ export function Residents() {
             <div className="flex-1 w-full overflow-y-auto pr-2 custom-scrollbar">
                 <div className="w-full min-h-full flex flex-col">
 
-                    {/* Page Header */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
                         <div>
                             <h1 className="text-2xl font-bold text-foreground">Moradores e Unidades</h1>
@@ -119,7 +115,6 @@ export function Residents() {
                         </button>
                     </div>
 
-                    {/* Toolbar: Search & Actions */}
                     <div className="flex flex-col md:flex-row gap-4 mb-6 bg-card p-2 rounded-xl border border-border shadow-sm">
                         <div className="relative flex-1">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -144,7 +139,6 @@ export function Residents() {
                         </div>
                     </div>
 
-                    {/* Data Table */}
                     <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden flex flex-col flex-1">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-sm whitespace-nowrap">
@@ -196,7 +190,6 @@ export function Residents() {
                             </table>
                         </div>
 
-                        {/* Pagination Footer */}
                         <div className="px-6 py-4 border-t border-border flex items-center justify-between text-sm">
                             <span className="text-muted-foreground font-medium">
                                 Mostrando 1 a 5 de 47 resultados

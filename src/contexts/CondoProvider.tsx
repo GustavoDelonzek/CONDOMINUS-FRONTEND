@@ -1,6 +1,7 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { CondoContext } from './CondoContext';
 import { useAuth } from './AuthContext';
+import { setActiveCondoId as setApiClientCondoId } from '../services/apiClient';
 import { ACTIVE_CONDO_STORAGE_KEY } from '../lib/storageKeys';
 
 export function CondoProvider({ children }: { children: ReactNode }) {
@@ -10,10 +11,11 @@ export function CondoProvider({ children }: { children: ReactNode }) {
   );
 
   const activeMembership = memberships.find((m) => m.condominiumId === selectedCondoId) ?? null;
-  // Se o id salvo não corresponde a nenhuma membership do usuário atual (ex.: após logout,
-  // ou sessão restaurada com outro usuário), trata como "nada selecionado". É só uma projeção
-  // derivada do estado atual — não precisa de efeito para "sincronizar".
   const activeCondoId = activeMembership ? selectedCondoId : null;
+
+  useEffect(() => {
+    setApiClientCondoId(activeCondoId);
+  }, [activeCondoId]);
 
   function setActiveCondoId(condominiumId: string) {
     setSelectedCondoId(condominiumId);

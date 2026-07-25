@@ -3,6 +3,7 @@ import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { DashboardAdminCompany } from './pages/DashboardAdminCompany';
 import { Condominiums } from './pages/admin/Condominiums';
+import { CondominiumDetail } from './pages/admin/CondominiumDetail';
 import { AdminUsers } from './pages/admin/AdminUsers';
 import { Documents } from './pages/admin/Documents';
 import { Billing } from './pages/admin/Billing';
@@ -16,26 +17,17 @@ import { TicketsInbox } from './pages/syndic/TicketsInbox';
 import { Reservations } from './pages/syndic/Reservations';
 import { Login } from './pages/auth/Login';
 import { SelectCondominium } from './pages/auth/SelectCondominium';
-import { RequireAuth, RequireCondo } from './routes/guards';
-import { useAuth, type UserRole } from './contexts/AuthContext';
+import { RequireAuth, RequireAdminAccess, RequireSyndicAccess } from './routes/guards';
+import { useAuth } from './contexts/AuthContext';
 import { useCondo } from './contexts/CondoContext';
 import { FullScreenLoading } from './components/ui/FullScreenLoading';
-
-const ROLE_LABELS: Record<UserRole, string> = {
-  super_admin: 'Administrador da Plataforma',
-  company_admin: 'Administradora',
-  syndic: 'Síndico',
-  porter: 'Portaria',
-  landlord: 'Proprietário',
-  resident: 'Morador',
-};
+import { ROLE_LABELS, destinationForRole, hasAdminAccess } from './lib/roles';
 
 function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { activeMembership } = useCondo();
-  const activeItem = location.pathname.split('/').pop() || 'dashboard';
+  const activeItem = location.pathname.split('/')[2] || 'dashboard';
 
   const handleNavigate = (id: string) => {
     if (id === 'dashboard') navigate('/admin/dashboard');
@@ -67,7 +59,7 @@ function AdminLayout() {
         <Header
           title={adminPageTitles[activeItem] ?? 'Dashboard'}
           userName={user?.name}
-          userRole={activeMembership ? ROLE_LABELS[activeMembership.role] : undefined}
+          userRole={ROLE_LABELS.super_admin}
           userInitials={user?.initials}
           onLogout={handleLogout}
         />
@@ -75,11 +67,11 @@ function AdminLayout() {
           <Routes>
             <Route path="dashboard" element={<DashboardAdminCompany />} />
             <Route path="condos" element={<Condominiums />} />
+            <Route path="condos/:id" element={<CondominiumDetail />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="documents" element={<Documents />} />
             <Route path="billing" element={<Billing />} />
             <Route path="settings" element={<Settings />} />
-            {/* fallback within admin */}
             <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Routes>
         </div>
@@ -111,7 +103,7 @@ function SyndicLayout() {
     <div className="flex flex-col md:flex-row min-h-screen bg-background font-sans">
       <SyndicSidebar activeItem={activeItem} onNavigate={handleNavigate} onLogout={handleLogout} />
       <main className="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0">
-        <SyndicHeader activeItem={activeItem} onBack={() => navigate('/admin/dashboard')} />
+        <SyndicHeader activeItem={activeItem} />
         <div className="flex-1 overflow-y-auto">
           <Routes>
             <Route path="dashboard" element={<SyndicDashboard />} />
@@ -119,7 +111,6 @@ function SyndicLayout() {
             <Route path="financial" element={<FinancialTransparency />} />
             <Route path="tickets" element={<TicketsInbox />} />
             <Route path="reservations" element={<Reservations />} />
-            {/* fallback within syndic */}
             <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Routes>
         </div>
@@ -129,7 +120,7 @@ function SyndicLayout() {
 }
 
 function RootRedirect() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user, memberships } = useAuth();
   const { activeCondoId, activeMembership } = useCondo();
 
   if (isLoading) {
@@ -138,10 +129,16 @@ function RootRedirect() {
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
+
+  const hasSyndicMembership = memberships.some((m) => m.role === 'syndic');
+  if (hasAdminAccess(user) && !hasSyndicMembership) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+
   if (!activeCondoId) {
     return <Navigate to="/select-condominium" replace />;
   }
-  return <Navigate to={activeMembership?.role === 'syndic' ? '/syndic/dashboard' : '/admin/dashboard'} replace />;
+  return <Navigate to={activeMembership ? destinationForRole(activeMembership.role) : '/select-condominium'} replace />;
 }
 
 function App() {
@@ -159,17 +156,17 @@ function App() {
       <Route
         path="/admin/*"
         element={
-          <RequireCondo>
+          <RequireAdminAccess>
             <AdminLayout />
-          </RequireCondo>
+          </RequireAdminAccess>
         }
       />
       <Route
         path="/syndic/*"
         element={
-          <RequireCondo>
+          <RequireSyndicAccess>
             <SyndicLayout />
-          </RequireCondo>
+          </RequireSyndicAccess>
         }
       />
       <Route path="/" element={<RootRedirect />} />

@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 interface MetricCardProps {
     label: string;
     value: string;
-    trend: string;
-    trendLabel: string;
+    trend?: string;
+    trendLabel?: string;
     icon: ReactNode;
     iconBg?: string;
 }
@@ -33,10 +33,12 @@ export function MetricCard({
                 </div>
             </div>
 
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <span className="text-success font-semibold">↑ {trend}</span>
-                {trendLabel}
-            </p>
+            {trend && trendLabel && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <span className="text-success font-semibold">↑ {trend}</span>
+                    {trendLabel}
+                </p>
+            )}
         </div>
     );
 }

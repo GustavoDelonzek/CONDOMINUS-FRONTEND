@@ -1,14 +1,25 @@
 import { ArrowLeft, Bell } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CondoSwitcher } from './CondoSwitcher';
+import { useAuth } from '../../contexts/AuthContext';
+import { hasAdminAccess } from '../../lib/roles';
 
 interface SyndicHeaderProps {
     activeItem?: string;
-    onBack?: () => void;
 }
 
 export function SyndicHeader({
     activeItem = 'dashboard',
-    onBack,
 }: SyndicHeaderProps) {
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    const canBackToMaster = hasAdminAccess(user);
+
+    function handleBackToMaster() {
+        navigate('/admin/dashboard');
+    }
+
     const getBreadcrumbs = () => {
         if (activeItem === 'residents') {
             return (
@@ -31,7 +42,6 @@ export function SyndicHeader({
                 </div>
             );
         }
-        // Default (Dashboard / Home)
         return (
             <div className="text-sm font-medium text-muted-foreground">
                 Dashboard <span className="mx-2">/</span> <span className="text-brand">Visão Geral</span>
@@ -41,12 +51,10 @@ export function SyndicHeader({
 
     return (
         <header className="px-4 md:px-8 py-3 md:py-4 flex items-center justify-between border-b border-border bg-card shrink-0 sticky top-0 z-40">
-            {/* Left side: Breadcrumbs - Hidden on very small screens */}
             <div className="hidden sm:block">
                 {getBreadcrumbs()}
             </div>
 
-            {/* Mobile Logo */}
             <div className="sm:hidden flex items-center gap-2">
                 <img
                     src="/logo.png"
@@ -58,16 +66,19 @@ export function SyndicHeader({
                 </span>
             </div>
 
-            {/* Right side: Voltar ao Super Admin & Bell */}
             <div className="flex items-center gap-3 md:gap-6">
-                <button
-                    onClick={onBack}
-                    className="flex items-center gap-2 text-[10px] md:text-sm font-semibold text-brand hover:text-brand/80 transition-colors bg-brand/10 px-2 md:px-3 py-1.5 rounded-lg"
-                >
-                    <ArrowLeft size={14} className="md:w-4 md:h-4" />
-                    <span className="hidden xs:inline">Voltar ao Master</span>
-                    <span className="xs:hidden">Voltar</span>
-                </button>
+                <CondoSwitcher />
+
+                {canBackToMaster && (
+                    <button
+                        onClick={handleBackToMaster}
+                        className="flex items-center gap-2 text-[10px] md:text-sm font-semibold text-brand hover:text-brand/80 transition-colors bg-brand/10 px-2 md:px-3 py-1.5 rounded-lg"
+                    >
+                        <ArrowLeft size={14} className="md:w-4 md:h-4" />
+                        <span className="hidden xs:inline">Voltar ao Master</span>
+                        <span className="xs:hidden">Voltar</span>
+                    </button>
+                )}
 
                 <button className="text-muted-foreground hover:text-foreground relative p-1">
                     <Bell size={18} className="md:w-5 md:h-5" />

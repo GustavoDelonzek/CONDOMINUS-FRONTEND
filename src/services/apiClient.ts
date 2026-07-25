@@ -1,5 +1,23 @@
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api';
 
+let activeCondoId: string | null = null;
+
+export function setActiveCondoId(condominiumId: string | null) {
+  activeCondoId = condominiumId;
+}
+
+let authToken: string | null = null;
+
+export function setAuthToken(token: string | null) {
+  authToken = token;
+}
+
+let unauthorizedHandler: (() => void) | null = null;
+
+export function setUnauthorizedHandler(handler: (() => void) | null) {
+  unauthorizedHandler = handler;
+}
+
 export class ApiError extends Error {
   status: number;
   errors?: Record<string, string[]>;
@@ -16,13 +34,13 @@ interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   token?: string | null;
+  condoId?: string | null;
 }
 
-// Toda resposta do backend passa pelo ResponseMiddleware dele, que sempre injeta
-// `status_code` no corpo — por isso dá pra tratar erro só olhando `response.ok` + `data.message`,
-// sem parsing especial por endpoint (ver docs/auth-routes.md).
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = 'GET', body, token } = options;
+  const { method = 'GET', body, token, condoId } = options;
+  const effectiveToken = token ?? authToken;
+  const effectiveCondoId = condoId !== undefined ? condoId : activeCondoId;
 
   let response: Response;
   try {
@@ -31,7 +49,8 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(effectiveToken ? { Authorization: `Bearer ${effectiveToken}` } : {}),
+        ...(effectiveCondoId ? { 'X-Condo-Id': effectiveCondoId } : {}),
       },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
@@ -42,6 +61,9 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
+    if (response.status === 401) {
+      unauthorizedHandler?.();
+    }
     const message = typeof data?.message === 'string' ? data.message : `Erro ${response.status} ao chamar ${path}`;
     throw new ApiError(response.status, message, data?.errors);
   }

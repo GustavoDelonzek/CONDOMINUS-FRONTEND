@@ -1,6 +1,5 @@
 import { createContext, useContext } from 'react';
 
-// Papéis conforme EnumRoleUser do backend (docs/functional-scope.md §1).
 export type UserRole = 'super_admin' | 'company_admin' | 'syndic' | 'porter' | 'landlord' | 'resident';
 
 export interface MembershipUnit {
@@ -30,6 +29,7 @@ export interface AuthContextValue {
   memberships: Membership[];
   isAuthenticated: boolean;
   isLoading: boolean;
+  sessionExpired: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }

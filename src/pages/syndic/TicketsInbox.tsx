@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Search, Filter, MapPin, Phone, Mail, Clock, Image as ImageIcon, User, FileText } from 'lucide-react';
 
-// --- Types ---
 type TicketStatus = 'Novo' | 'Pendente';
 type Priority = 'Alta' | 'Média' | 'Baixa';
 
@@ -33,7 +32,6 @@ interface TicketHistoryItem {
   type: 'creation' | 'assignment' | 'update';
 }
 
-// --- Mock Data ---
 const MOCK_TICKETS: Ticket[] = [
   {
     id: '1',
@@ -122,7 +120,6 @@ const MOCK_TICKETS: Ticket[] = [
   }
 ];
 
-// --- Badges ---
 function StatusBadge({ status }: { status: TicketStatus }) {
   if (status === 'Novo') {
     return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-brand/10 text-brand border border-brand/20"><span className="w-1.5 h-1.5 rounded-full bg-brand"></span>Novo</span>;
@@ -146,13 +143,11 @@ export function TicketsInbox() {
   return (
     <div className="flex flex-col lg:flex-row h-full bg-background overflow-hidden relative">
       
-      {/* Left Panel: Ticket List - Hidden when ticket selected on mobile */}
       <div className={`
         w-full lg:w-[380px] flex flex-col bg-card border-r border-border shrink-0 z-10 shadow-[2px_0_8px_rgba(0,0,0,0.02)]
         ${selectedTicketId ? 'hidden lg:flex' : 'flex'}
       `}>
         
-        {/* Header */}
         <div className="p-4 md:p-6 border-b border-border">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-foreground">Tickets</h2>
@@ -177,7 +172,6 @@ export function TicketsInbox() {
           </div>
         </div>
 
-        {/* List */}
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {MOCK_TICKETS.map(ticket => (
             <div 
@@ -206,12 +200,10 @@ export function TicketsInbox() {
         </div>
       </div>
 
-      {/* Middle Panel: Ticket Details - Visible full width on mobile when selected */}
       <div className={`
         flex-1 flex flex-col bg-card min-w-0 border-r border-border relative
         ${!selectedTicketId ? 'hidden lg:flex' : 'flex'}
       `}>
-        {/* Mobile Back Button */}
         <button 
           onClick={() => setSelectedTicketId('')}
           className="lg:hidden absolute top-4 left-4 p-2 text-brand font-bold flex items-center gap-1 z-20"
@@ -219,7 +211,6 @@ export function TicketsInbox() {
           &lsaquo; Voltar
         </button>
         
-        {/* Content area */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 mt-10 lg:mt-0 custom-scrollbar">
           <div className="max-w-3xl">
             {selectedTicket ? (
@@ -299,7 +290,6 @@ export function TicketsInbox() {
                         <div className="flex items-center justify-between">
                            <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-pointer group">
                              <div className="w-4 h-4 rounded border border-border bg-foreground flex items-center justify-center transition-colors">
-                                {/* Checked state */}
                              </div>
                              Notificar morador
                            </label>
@@ -317,7 +307,6 @@ export function TicketsInbox() {
         </div>
       </div>
 
-      {/* Right Panel: Ticket Meta */}
       {selectedTicket && (
         <div className="w-[300px] bg-card border-l border-border p-6 shrink-0 overflow-y-auto custom-scrollbar shadow-[0_0_8px_rgba(0,0,0,0.02)] hidden lg:block">
            

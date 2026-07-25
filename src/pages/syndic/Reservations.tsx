@@ -100,7 +100,6 @@ const MOCK_RESERVATIONS: Reservation[] = [
   }
 ];
 
-// --- Badges ---
 function StatusBadge({ status }: { status: ReservationStatus }) {
   if (status === 'Aguardando Aprovação') {
     return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-amber-600 border border-amber-200"><span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Pendentes</span>;
@@ -150,7 +149,6 @@ export function Reservations() {
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {activeTab === 'reservations' ? (
           <>
-            {/* Left Panel: List - Stacked on mobile, hidden when detail is open */}
             <div className={`
               w-full lg:w-[340px] flex flex-col bg-card border-r border-border shrink-0 z-10
               ${selectedResId ? 'hidden lg:flex' : 'flex'}
@@ -185,7 +183,6 @@ export function Reservations() {
                   />
                 </div>
 
-                {/* List */}
                 <div className="flex-1 overflow-y-auto custom-scrollbar -mx-4 md:-mx-6">
                   {MOCK_RESERVATIONS.map(res => (
                     <div 
@@ -217,12 +214,10 @@ export function Reservations() {
               </div>
             </div>
 
-            {/* Middle Panel: Details - Full width on mobile when selected */}
             <div className={`
               flex-1 flex flex-col bg-background min-w-0 border-r border-border relative
               ${!selectedResId ? 'hidden lg:flex' : 'flex'}
             `}>
-              {/* Mobile Back Button */}
               <button 
                 onClick={() => setSelectedResId('')}
                 className="lg:hidden absolute top-4 left-4 p-2 cursor-pointer text-brand font-bold flex items-center gap-1 z-20"
@@ -253,7 +248,6 @@ export function Reservations() {
                          </div>
                       </div>                   
     
-                      {/* Date / Time Cards */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                          <div className="bg-background border-2 border-slate-100 rounded-2xl p-6 flex items-center gap-5 shadow-sm">
                             <div className="w-12 h-12 rounded-full bg-brand/5 text-brand flex items-center justify-center shrink-0">
@@ -275,12 +269,10 @@ export function Reservations() {
                          </div>
                       </div>
     
-                      {/* Timeline UI Placeholder */}
                       <div className="mb-12">
                          <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-6">Disponibilidade do Dia ({selectedRes.date.toUpperCase()})</h3>
                          
                          <div className="w-full h-10 bg-success/10 rounded-xl overflow-hidden flex relative border-2 border-success/20">
-                            {/* Mocking the yellow block */}
                             <div className="absolute left-[30%] w-[30%] h-full bg-warning flex items-center justify-center">
                                <span className="text-[11px] font-bold text-white uppercase tracking-wider shadow-sm">Solicitado</span>
                             </div>
@@ -297,7 +289,6 @@ export function Reservations() {
                          </div>
                       </div>
     
-                      {/* Rule Blocks */}
                       <div className="flex flex-wrap gap-6 mb-14">
                          <div className="flex-1 min-w-[200px] bg-accent/30 rounded-2xl p-6 text-center border border-slate-100">
                            <p className="text-[11px] text-muted-foreground mb-2 font-bold uppercase tracking-wider">Capacidade</p>
@@ -313,7 +304,6 @@ export function Reservations() {
                          </div>
                       </div>
     
-                      {/* Other Reservations */}
                       <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-6 flex items-center gap-2">
                          <Clock size={14} /> Outras Reservas no Dia ({selectedRes.date.toUpperCase()})
                       </h3>
@@ -346,7 +336,6 @@ export function Reservations() {
               </div>
             </div>
 
-            {/* Right Panel: Requester Meta */}
             {selectedRes && (
               <div className="w-[300px] bg-card p-6 shrink-0 overflow-y-auto custom-scrollbar hidden lg:block border-l border-border">
                  <div className="space-y-6">

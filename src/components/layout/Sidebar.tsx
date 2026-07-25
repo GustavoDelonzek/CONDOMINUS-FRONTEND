@@ -17,7 +17,6 @@ const menuItems = [
 export function Sidebar({ activeItem, onNavigate }: SidebarProps) {
   return (
     <aside className="relative z-50 w-16 h-screen flex flex-col items-center py-6 bg-sidebar border-r border-sidebar-border shrink-0">
-      {/* Logo */}
       <div className="mb-8 flex items-center justify-center w-full px-2">
         <img
           src="/logo.png"
@@ -26,7 +25,6 @@ export function Sidebar({ activeItem, onNavigate }: SidebarProps) {
         />
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 flex flex-col items-center gap-1">
         {menuItems.map((item) => {
           const isActive = item.id === activeItem;
@@ -48,7 +46,6 @@ export function Sidebar({ activeItem, onNavigate }: SidebarProps) {
             >
               <Icon size={20} strokeWidth={isActive ? 2.5 : 1.75} />
 
-              {/* Tooltip */}
               <span className="
                 pointer-events-none absolute left-full ml-3 px-2.5 py-1.5
                 bg-foreground text-background text-xs rounded-lg font-medium

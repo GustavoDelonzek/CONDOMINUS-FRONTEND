@@ -1,4 +1,5 @@
 import { LogOut } from 'lucide-react';
+import { CondoSwitcher } from './CondoSwitcher';
 
 interface HeaderProps {
     title: string;
@@ -20,6 +21,7 @@ export function Header({
             <h1 className="text-2xl font-bold text-foreground">{title}</h1>
 
             <div className="flex items-center gap-4">
+                <CondoSwitcher />
                 <div className="text-right">
                     <p className="text-sm font-bold text-foreground">{userName}</p>
                     <p className="text-xs text-muted-foreground">{userRole}</p>
