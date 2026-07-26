@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Clock, Calendar as CalendarIcon, Filter, Phone, X, Check, Users, Tag, ShieldCheck } from 'lucide-react';
 import { useCondo } from '../../contexts/CondoContext';
 import { ApiError } from '../../services/apiClient';
@@ -7,6 +6,7 @@ import * as reservationService from '../../services/reservationService';
 import type { BackendReservation, ReservationStatus } from '../../services/reservationService';
 import type { BookingRules } from '../../services/commonAreaService';
 import { formatDate } from '../../lib/format';
+import { SegmentedTabs } from '../../components/ui/SegmentedTabs';
 
 const STATUS_LABELS: Record<ReservationStatus, string> = {
     pending: 'Aguardando Aprovação',
@@ -124,7 +124,6 @@ const EXTRA_STATUS_OPTIONS: { value: ReservationStatus; label: string }[] = [
 ];
 
 export function Reservations() {
-    const navigate = useNavigate();
     const { activeCondoId } = useCondo();
     const [items, setItems] = useState<BackendReservation[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -227,20 +226,6 @@ export function Reservations() {
 
     return (
         <div className="flex flex-col h-full bg-background overflow-hidden relative">
-            <div className="flex items-center justify-between px-8 pt-4 border-b border-border bg-card shrink-0 h-[72px]">
-                <div className="flex items-center gap-8 h-full">
-                    <button className="text-sm h-full flex items-center border-b-2 border-brand font-bold text-brand cursor-default">
-                        Reservas
-                    </button>
-                    <button
-                        onClick={() => navigate('/syndic/common-areas')}
-                        className="text-sm h-full flex items-center border-b-2 border-transparent font-semibold text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
-                    >
-                        Áreas Comuns e Regras
-                    </button>
-                </div>
-            </div>
-
             {loadError && (
                 <div className="mx-6 mt-4 bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-lg px-4 py-3">
                     {loadError}
@@ -326,19 +311,15 @@ export function Reservations() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2 border-b border-border/50 pb-4 mb-4">
-                            <button
-                                onClick={() => handleTabChange('pending')}
-                                className={`px-3 py-1.5 cursor-pointer text-sm font-bold rounded-full transition-colors ${activeTab === 'pending' ? 'bg-brand/10 text-brand' : 'text-muted-foreground hover:text-foreground'}`}
-                            >
-                                Pendentes ({items.filter((r) => r.status === 'pending').length})
-                            </button>
-                            <button
-                                onClick={() => handleTabChange('all')}
-                                className={`px-3 py-1.5 cursor-pointer text-sm font-bold rounded-full transition-colors ${activeTab === 'all' ? 'bg-brand/10 text-brand' : 'text-muted-foreground hover:text-foreground'}`}
-                            >
-                                Todos ({items.length})
-                            </button>
+                        <div className="mb-4">
+                            <SegmentedTabs
+                                value={activeTab}
+                                onChange={handleTabChange}
+                                options={[
+                                    { value: 'pending', label: 'Pendentes', count: items.filter((r) => r.status === 'pending').length },
+                                    { value: 'all', label: 'Todos', count: items.length },
+                                ]}
+                            />
                         </div>
 
                         <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar -mx-4 md:-mx-6">
