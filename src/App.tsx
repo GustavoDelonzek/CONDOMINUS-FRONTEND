@@ -18,6 +18,7 @@ import { Units } from './pages/syndic/Units';
 import { FinancialTransparency } from './pages/syndic/FinancialTransparency';
 import { TicketsInbox } from './pages/syndic/TicketsInbox';
 import { Reservations } from './pages/syndic/Reservations';
+import { WhatsApp } from './pages/syndic/WhatsApp';
 import { Login } from './pages/auth/Login';
 import { SelectCondominium } from './pages/auth/SelectCondominium';
 import { RequireAuth, RequireAdminAccess, RequireSyndicAccess } from './routes/guards';
@@ -98,6 +99,7 @@ function SyndicLayout() {
     if (id === 'financial') navigate('/syndic/financial');
     if (id === 'tickets') navigate('/syndic/tickets');
     if (id === 'reservations') navigate('/syndic/reservations');
+    if (id === 'whatsapp') navigate('/syndic/whatsapp');
   };
 
   const handleLogout = async () => {
@@ -120,6 +122,7 @@ function SyndicLayout() {
             <Route path="financial" element={<FinancialTransparency />} />
             <Route path="tickets" element={<TicketsInbox />} />
             <Route path="reservations" element={<Reservations />} />
+            <Route path="whatsapp" element={<WhatsApp />} />
             <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Routes>
         </div>

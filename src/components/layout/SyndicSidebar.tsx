@@ -1,4 +1,4 @@
-import { Home, Users, PieChart, Wrench, Calendar, Layers, MapPin, DoorOpen, LogOut } from 'lucide-react';
+import { Home, Users, PieChart, Wrench, Calendar, Layers, MapPin, DoorOpen, LogOut, MessageCircle } from 'lucide-react';
 
 interface SyndicSidebarProps {
   activeItem: string;
@@ -15,6 +15,7 @@ const topMenuItems = [
   { id: 'financial', icon: PieChart, label: 'Financeiro' },
   { id: 'tickets', icon: Wrench, label: 'Ocorrências' },
   { id: 'reservations', icon: Calendar, label: 'Reservas' },
+  { id: 'whatsapp', icon: MessageCircle, label: 'WhatsApp' },
 ];
 
 export function SyndicSidebar({ activeItem, onNavigate, onLogout }: SyndicSidebarProps) {

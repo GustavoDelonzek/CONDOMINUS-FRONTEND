@@ -63,6 +63,13 @@ export function SyndicHeader({
                 </div>
             );
         }
+        if (activeItem === 'whatsapp') {
+            return (
+                <div className="text-sm font-medium text-muted-foreground">
+                    Dashboard <span className="mx-2">/</span> <span className="text-brand">WhatsApp</span>
+                </div>
+            );
+        }
         return (
             <div className="text-sm font-medium text-muted-foreground">
                 Dashboard <span className="mx-2">/</span> <span className="text-brand">Visão Geral</span>
