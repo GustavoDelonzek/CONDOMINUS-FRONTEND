@@ -28,6 +28,27 @@ export function SyndicHeader({
                 </div>
             );
         }
+        if (activeItem === 'blocks') {
+            return (
+                <div className="text-sm font-medium text-muted-foreground">
+                    Dashboard <span className="mx-2">/</span> <span className="text-brand">Blocos</span>
+                </div>
+            );
+        }
+        if (activeItem === 'units') {
+            return (
+                <div className="text-sm font-medium text-muted-foreground">
+                    Dashboard <span className="mx-2">/</span> <span className="text-brand">Unidades</span>
+                </div>
+            );
+        }
+        if (activeItem === 'common-areas') {
+            return (
+                <div className="text-sm font-medium text-muted-foreground">
+                    Dashboard <span className="mx-2">/</span> <span className="text-brand">Áreas Comuns</span>
+                </div>
+            );
+        }
         if (activeItem === 'tickets') {
             return (
                 <div className="text-sm font-medium text-muted-foreground">

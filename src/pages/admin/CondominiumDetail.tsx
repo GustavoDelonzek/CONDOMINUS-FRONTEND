@@ -50,7 +50,7 @@ export function CondominiumDetail() {
     const [saved, setSaved] = useState(false);
 
     const blocks = useResourceCount(id, (condoId) => blockService.listBlocks(condoId, 1));
-    const units = useResourceCount(id, (condoId) => unitService.listUnits(condoId, 1));
+    const units = useResourceCount(id, (condoId) => unitService.listUnits(condoId, { perPage: 1 }));
     const commonAreas = useResourceCount(id, (condoId) => commonAreaService.listCommonAreas(condoId, 1));
 
     useEffect(() => {

@@ -1,419 +1,649 @@
-import { useState } from 'react';
-import { Search, Clock, Calendar as CalendarIcon, Bell, Filter, MapPin, Phone, Mail } from 'lucide-react';
-import { CommonAreaRules } from './CommonAreaRules';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Clock, Calendar as CalendarIcon, Filter, Phone, X, Check, Users, Tag, ShieldCheck } from 'lucide-react';
+import { useCondo } from '../../contexts/CondoContext';
+import { ApiError } from '../../services/apiClient';
+import * as reservationService from '../../services/reservationService';
+import type { BackendReservation, ReservationStatus } from '../../services/reservationService';
+import type { BookingRules } from '../../services/commonAreaService';
+import { formatDate } from '../../lib/format';
 
-type ReservationStatus = 'Aguardando Aprovação' | 'Confirmado' | 'Recusado' | 'Concluído';
+const STATUS_LABELS: Record<ReservationStatus, string> = {
+    pending: 'Aguardando Aprovação',
+    confirmed: 'Confirmado',
+    denied: 'Recusado',
+    canceled: 'Cancelado',
+    completed: 'Concluído',
+};
 
-interface Reservation {
-  id: string;
-  spaceName: string;
-  status: ReservationStatus;
-  date: string;
-  timeRange: string;
-  duration: string;
-  capacity: number;
-  cleaningFee: string;
-  specificRule: string;
-  timeAgo: string;
-  unit: string;
-  block: string;
-  requesterName: string;
-  requesterRole: string;
-  requesterInitials: string;
-  requesterPhone: string;
-  requesterEmail: string;
-  requesterStatus: 'Adimplente' | 'Inadimplente';
-  reservationsMonth: string;
-  infractions: string;
-  observations: string;
+const STATUS_STYLES: Record<ReservationStatus, string> = {
+    pending: 'text-amber-600 border-amber-200 bg-amber-50',
+    confirmed: 'text-emerald-600 border-emerald-200 bg-emerald-50',
+    denied: 'text-destructive border-destructive/20 bg-destructive/10',
+    canceled: 'text-muted-foreground border-border bg-accent',
+    completed: 'text-muted-foreground border-border bg-accent',
+};
+
+const STATUS_BAR_COLORS: Record<ReservationStatus, string> = {
+    pending: 'bg-amber-400',
+    confirmed: 'bg-success',
+    denied: 'bg-destructive/70',
+    canceled: 'bg-muted-foreground/40',
+    completed: 'bg-muted-foreground/70',
+};
+
+function parseHM(time: string) {
+    const [h, m] = time.split(':').map(Number);
+    return h * 60 + (m || 0);
 }
 
-const MOCK_RESERVATIONS: Reservation[] = [
-  {
-    id: '1',
-    spaceName: 'Churrasqueira',
-    status: 'Aguardando Aprovação',
-    date: '15 de Outubro, 2023',
-    timeRange: '12:00 - 16:00',
-    duration: '4 horas',
-    capacity: 30,
-    cleaningFee: 'R$ 50,00',
-    specificRule: 'Som até 22h',
-    timeAgo: '2 min atrás',
-    unit: 'Apartamento 304',
-    block: 'Bloco A',
-    requesterName: 'Roberto Alves',
-    requesterRole: 'Proprietário',
-    requesterInitials: 'RA',
-    requesterPhone: '(11) 98765-4321',
-    requesterEmail: 'roberto.alves@email.com',
-    requesterStatus: 'Adimplente',
-    reservationsMonth: '1/4',
-    infractions: 'Nenhuma',
-    observations: '"Vou precisar usar o freezer adicional se possível. Serão apenas familiares, cerca de 15 pessoas."'
-  },
-  {
-    id: '2',
-    spaceName: 'Quadra Pol.',
-    status: 'Confirmado',
-    date: '16 de Outubro, 2023',
-    timeRange: '10:00 - 11:30',
-    duration: '1.5 horas',
-    capacity: 20,
-    cleaningFee: 'R$ 0,00',
-    specificRule: 'Sem chuteira de trava',
-    timeAgo: '15 min atrás',
-    unit: 'Apt 101',
-    block: '',
-    requesterName: 'Ana Silva',
-    requesterRole: 'Inquilino',
-    requesterInitials: 'AS',
-    requesterPhone: '(11) 91234-5678',
-    requesterEmail: 'ana.silva@email.com',
-    requesterStatus: 'Inadimplente',
-    reservationsMonth: '2/4',
-    infractions: '1 Advertência',
-    observations: 'Nenhuma observação.'
-  },
-  {
-    id: '3',
-    spaceName: 'Salão de Festas',
-    status: 'Concluído',
-    date: '21 de Outubro, 2023',
-    timeRange: '14:00 - 22:00',
-    duration: '8 horas',
-    capacity: 100,
-    cleaningFee: 'R$ 150,00',
-    specificRule: 'Limpeza não inclusa',
-    timeAgo: '1h atrás',
-    unit: 'Apt 802',
-    block: '',
-    requesterName: 'Carlos Mendes',
-    requesterRole: 'Proprietário',
-    requesterInitials: 'CM',
-    requesterPhone: '(11) 99876-1234',
-    requesterEmail: 'carlos.mendes@email.com',
-    requesterStatus: 'Adimplente',
-    reservationsMonth: '1/2',
-    infractions: 'Nenhuma',
-    observations: 'Festa de aniversário infantil.'
-  }
-];
+function minutesToHM(totalMinutes: number) {
+    const h = Math.floor(totalMinutes / 60).toString().padStart(2, '0');
+    const m = Math.round(totalMinutes % 60).toString().padStart(2, '0');
+    return `${h}:${m}`;
+}
+
+function relativeMinutes(baseIso: string, targetIso: string) {
+    const base = new Date(baseIso);
+    const target = new Date(targetIso);
+    const baseMidnight = new Date(base.getFullYear(), base.getMonth(), base.getDate()).getTime();
+    return Math.round((target.getTime() - baseMidnight) / 60000);
+}
+
+function timelineBounds(bookingRules: BookingRules | null | undefined) {
+    const opens = bookingRules?.opens_at ? parseHM(bookingRules.opens_at) : 6 * 60;
+    const closes = bookingRules?.closes_at ? parseHM(bookingRules.closes_at) : 22 * 60;
+    return closes > opens ? { opens, closes } : { opens: 6 * 60, closes: 22 * 60 };
+}
+
+function timelineBlockStyle(res: BackendReservation, bounds: { opens: number; closes: number }) {
+    const total = bounds.closes - bounds.opens;
+    const startMin = Math.min(Math.max(relativeMinutes(res.start_time, res.start_time), bounds.opens), bounds.closes);
+    const endMin = Math.min(Math.max(relativeMinutes(res.start_time, res.end_time), bounds.opens), bounds.closes);
+    const left = ((startMin - bounds.opens) / total) * 100;
+    const width = Math.max(((endMin - startMin) / total) * 100, 4);
+    return { left: `${left}%`, width: `${width}%` };
+}
+
+function tickPercent(minute: number, bounds: { opens: number; closes: number }) {
+    const clamped = Math.min(Math.max(minute, bounds.opens), bounds.closes);
+    return ((clamped - bounds.opens) / (bounds.closes - bounds.opens)) * 100;
+}
+
+function buildTimeMarks(dayReservations: BackendReservation[], selectedId: string, bounds: { opens: number; closes: number }) {
+    const marks = new Map<number, boolean>();
+    for (const res of dayReservations) {
+        const isSelected = res.id === selectedId;
+        const startMin = relativeMinutes(res.start_time, res.start_time);
+        const endMin = relativeMinutes(res.start_time, res.end_time);
+        for (const minute of [startMin, endMin]) {
+            if (minute === bounds.opens || minute === bounds.closes) continue;
+            marks.set(minute, (marks.get(minute) ?? false) || isSelected);
+        }
+    }
+    return Array.from(marks.entries()).map(([minute, isSelected]) => ({ minute, isSelected }));
+}
 
 function StatusBadge({ status }: { status: ReservationStatus }) {
-  if (status === 'Aguardando Aprovação') {
-    return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-amber-600 border border-amber-200"><span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Pendentes</span>;
-  }
-  if (status === 'Confirmado') {
-     return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-emerald-600 border border-emerald-200"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Confirmado</span>;
-  }
-  if (status === 'Recusado') {
-     return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-brand border border-brand/20"><span className="w-1.5 h-1.5 rounded-full bg-brand"></span>Novo</span>;
-  }
-  return <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-muted-foreground border border-border"><span className="w-1.5 h-1.5 rounded-full bg-muted-foreground"></span>Concluído</span>;
+    return (
+        <span
+            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${STATUS_STYLES[status]}`}
+        >
+            <span className="w-1.5 h-1.5 rounded-full bg-current" />
+            {STATUS_LABELS[status]}
+        </span>
+    );
 }
 
+function formatTimeRange(startIso: string, endIso: string) {
+    const start = new Date(startIso);
+    const end = new Date(endIso);
+    const fmt = (d: Date) => d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return `${fmt(start)} - ${fmt(end)}`;
+}
+
+function sameDay(aIso: string, bIso: string) {
+    return new Date(aIso).toDateString() === new Date(bIso).toDateString();
+}
+
+function sortByStartTimeAsc(list: BackendReservation[]) {
+    return [...list].sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+}
+
+function isSameDateString(iso: string, dateStr: string) {
+    const d = new Date(iso);
+    const local = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return local === dateStr;
+}
+
+const EXTRA_STATUS_OPTIONS: { value: ReservationStatus; label: string }[] = [
+    { value: 'confirmed', label: 'Confirmado' },
+    { value: 'denied', label: 'Recusado' },
+    { value: 'canceled', label: 'Cancelado' },
+    { value: 'completed', label: 'Concluído' },
+];
+
 export function Reservations() {
-  const [activeTab, setActiveTab] = useState<'reservations' | 'rules'>('reservations');
-  const [selectedResId, setSelectedResId] = useState<string>(MOCK_RESERVATIONS[0]?.id || '');
-  const selectedRes = MOCK_RESERVATIONS.find(r => r.id === selectedResId);
+    const navigate = useNavigate();
+    const { activeCondoId } = useCondo();
+    const [items, setItems] = useState<BackendReservation[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState<string | null>(null);
+    const [refreshToken, setRefreshToken] = useState(0);
+    const [activeTab, setActiveTab] = useState<'pending' | 'all'>('pending');
+    const [filterPanelOpen, setFilterPanelOpen] = useState(false);
+    const [filterStatus, setFilterStatus] = useState<ReservationStatus | ''>('');
+    const [filterDate, setFilterDate] = useState('');
+    const filterRef = useRef<HTMLDivElement>(null);
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [actionError, setActionError] = useState<string | null>(null);
+    const [actioningId, setActioningId] = useState<string | null>(null);
 
-  return (
-    <div className="flex flex-col h-full bg-background overflow-hidden relative">
-      <div className="flex items-center justify-between px-8 pt-4 border-b border-border bg-card shrink-0 h-[72px]">
-        <div className="flex items-center gap-8 h-full">
-          <button 
-            onClick={() => setActiveTab('reservations')}
-            className={`text-sm h-full flex items-center border-b-2 cursor-pointer transition-colors ${activeTab === 'reservations' ? 'font-bold text-brand border-brand' : 'font-semibold text-muted-foreground hover:text-foreground border-transparent'}`}
-          >
-            Reservas
-          </button>
-          <button 
-            onClick={() => setActiveTab('rules')}
-            className={`text-sm h-full flex items-center border-b-2 cursor-pointer transition-colors ${activeTab === 'rules' ? 'font-bold text-brand border-brand' : 'font-semibold text-muted-foreground hover:text-foreground border-transparent'}`}
-          >
-            Configuração de Regras
-          </button>
-        </div>
-        <div className="flex items-center gap-6">
-          <button className="flex items-center gap-2 cursor-pointer bg-brand text-white px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-brand/90 transition-colors shadow-sm">
-            <span className="text-lg leading-none">+</span> Nova Reserva
-          </button>
-          <button className="text-muted-foreground hover:text-foreground cursor-pointer relative">
-            <Bell size={20} />
-            <span className="absolute top-0 right-0 w-2 h-2 bg-destructive rounded-full border-2 border-card"></span>
-          </button>
-        </div>
-      </div>
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+                setFilterPanelOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        {activeTab === 'reservations' ? (
-          <>
-            <div className={`
-              w-full lg:w-[340px] flex flex-col bg-card border-r border-border shrink-0 z-10
-              ${selectedResId ? 'hidden lg:flex' : 'flex'}
-            `}>
-              <div className="p-4 md:p-6 flex flex-col h-full overflow-hidden">
+    function handleTabChange(tab: 'pending' | 'all') {
+        setActiveTab(tab);
+        if (tab === 'pending') {
+            setFilterStatus('');
+            setFilterDate('');
+            setFilterPanelOpen(false);
+        }
+    }
 
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-bold text-xl text-foreground">Reservas</h3>
-                  <button className="text-muted-foreground hover:text-foreground cursor-pointer">
-                    <Filter size={20} strokeWidth={1.5} />
-                  </button>
-                </div>
-                
-                <div className="flex items-center gap-4 border-b border-border/50 pb-4 mb-4">
-                  <button className="px-4 py-1.5 bg-brand/10 text-brand cursor-pointer text-sm font-bold rounded-full">
-                    Todos ({MOCK_RESERVATIONS.length})
-                  </button>
-                  <button className="text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
-                    Novos (1)
-                  </button>
-                  <button className="text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
-                    Pendentes (1)
-                  </button>
-                </div>
+    const hasExtraFilters = !!filterStatus || !!filterDate;
 
-                <div className="relative mb-6">
-                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <input 
-                    type="text" 
-                    placeholder="Filtrar reservas..." 
-                    className="w-full pl-9 pr-4 py-2.5 bg-accent/30 border border-border/50 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brand placeholder:text-muted-foreground"
-                  />
-                </div>
+    useEffect(() => {
+        if (!activeCondoId) return;
+        let cancelled = false;
+        reservationService
+            .listReservations(activeCondoId, { perPage: 100 })
+            .then((result) => {
+                if (cancelled) return;
+                setItems(result.items);
+                setLoadError(null);
+                setSelectedId((current) => {
+                    if (current) return current;
+                    const pending = sortByStartTimeAsc(result.items.filter((r) => r.status === 'pending'));
+                    return pending[0]?.id ?? result.items[0]?.id ?? null;
+                });
+            })
+            .catch((err) => {
+                if (cancelled) return;
+                setLoadError(err instanceof ApiError ? err.message : 'Não foi possível carregar as reservas.');
+            })
+            .finally(() => {
+                if (!cancelled) setIsLoading(false);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, [activeCondoId, refreshToken]);
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar -mx-4 md:-mx-6">
-                  {MOCK_RESERVATIONS.map(res => (
-                    <div 
-                      key={res.id}
-                      onClick={() => setSelectedResId(res.id)}
-                      className={`p-4 md:p-6 cursor-pointer transition-colors border-b border-border relative
-                        ${selectedResId === res.id ? 'bg-background border-l-[3px] border-l-brand' : 'bg-card hover:bg-accent/20 border-l-[3px] border-l-transparent'}
-                      `}
-                    >
-                      <div className="flex justify-between items-start mb-3">
-                        <StatusBadge status={res.status} />
-                        <span className="text-[11px] text-muted-foreground font-medium">{res.timeAgo}</span>
-                      </div>
-                      
-                      <h4 className="font-bold text-sm text-foreground mb-1 leading-tight">{res.spaceName}</h4>
-                      <p className="text-[11px] text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
-                         Reserva solicitada por {res.requesterName.split(' ')[0]} para {res.date} ({res.timeRange}). {res.observations && `Obs: ${res.observations}`}
-                      </p>
-                      
-                      <div className="flex items-center justify-between">
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-accent text-[10px] font-bold text-muted-foreground uppercase rounded">
-                           <span className="text-brand font-black">A</span> {res.block || res.unit}
-                        </span>
-                        <span className="text-[11px] font-bold text-muted-foreground">#{res.id.padStart(4, '482')}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+    let baseItems = activeTab === 'pending' ? items.filter((r) => r.status === 'pending') : items;
+    if (activeTab === 'all') {
+        if (filterStatus) baseItems = baseItems.filter((r) => r.status === filterStatus);
+        if (filterDate) baseItems = baseItems.filter((r) => isSameDateString(r.start_time, filterDate));
+    }
+    const filteredItems = sortByStartTimeAsc(baseItems);
+    const selectedRes = items.find((r) => r.id === selectedId) ?? null;
+    const otherSameDay = selectedRes
+        ? items.filter(
+              (r) =>
+                  r.id !== selectedRes.id &&
+                  r.common_area_id === selectedRes.common_area_id &&
+                  sameDay(r.start_time, selectedRes.start_time),
+          )
+        : [];
+    const dayReservations = selectedRes
+        ? items.filter(
+              (r) => r.common_area_id === selectedRes.common_area_id && sameDay(r.start_time, selectedRes.start_time),
+          )
+        : [];
+    const timelineRange = selectedRes ? timelineBounds(selectedRes.common_area?.booking_rules) : null;
+    const timeMarks =
+        selectedRes && timelineRange ? buildTimeMarks(dayReservations, selectedRes.id, timelineRange) : [];
 
-            <div className={`
-              flex-1 flex flex-col bg-background min-w-0 border-r border-border relative
-              ${!selectedResId ? 'hidden lg:flex' : 'flex'}
-            `}>
-              <button 
-                onClick={() => setSelectedResId('')}
-                className="lg:hidden absolute top-4 left-4 p-2 cursor-pointer text-brand font-bold flex items-center gap-1 z-20"
-              >
-                &lsaquo; Voltar
-              </button>
+    async function handleAction(reservation: BackendReservation, status: Exclude<ReservationStatus, 'pending'>) {
+        if (!activeCondoId) return;
+        setActioningId(reservation.id);
+        setActionError(null);
+        try {
+            await reservationService.updateReservationStatus(activeCondoId, reservation.id, status);
+            setRefreshToken((t) => t + 1);
+        } catch (err) {
+            setActionError(err instanceof ApiError ? err.message : 'Não foi possível atualizar a reserva.');
+        } finally {
+            setActioningId(null);
+        }
+    }
 
-              <div className="flex-1 overflow-y-auto p-6 md:p-8 lg:p-12 custom-scrollbar bg-background">
-                <div className="w-full">
-                  {selectedRes ? (
-                    <>
-                      <div className="flex flex-col md:flex-row md:items-start justify-between mb-10 gap-6">
-                         <div>
-                            <h1 className="text-3xl font-black text-foreground mb-4 tracking-tight">{selectedRes.spaceName}</h1>
-                            <StatusBadge status={selectedRes.status} />
-                         </div>
-                         
-                         <div className="flex items-center gap-4 shrink-0 mt-2 md:mt-0">
-                            <button className="text-sm font-bold cursor-pointer text-muted-foreground hover:text-foreground transition-colors mr-2">
-                              Enviar Mensagem
-                            </button>
-                            <button className="w-11 h-11 flex cursor-pointer items-center justify-center bg-background border border-destructive/40 text-destructive rounded-xl hover:bg-destructive/10 transition-colors">
-                              <span className="text-xl leading-none mb-1">&times;</span>
-                            </button>
-                            <button className="px-6 py-2.5 cursor-pointer bg-success text-white text-sm font-bold rounded-xl hover:bg-success/90 transition-colors flex items-center gap-2 shadow-sm">
-                              <span className="text-base leading-none">&#10003;</span> Aprovar
-                            </button>
-                         </div>
-                      </div>                   
-    
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                         <div className="bg-background border-2 border-slate-100 rounded-2xl p-6 flex items-center gap-5 shadow-sm">
-                            <div className="w-12 h-12 rounded-full bg-brand/5 text-brand flex items-center justify-center shrink-0">
-                              <CalendarIcon size={24} strokeWidth={1.5} />
-                            </div>
-                            <div>
-                              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">Data</p>
-                              <p className="text-base font-bold text-foreground">{selectedRes.date}</p>
-                            </div>
-                         </div>
-                         <div className="bg-background border-2 border-slate-100 rounded-2xl p-6 flex items-center gap-5 shadow-sm">
-                            <div className="w-12 h-12 rounded-full bg-brand/5 text-brand flex items-center justify-center shrink-0">
-                              <Clock size={24} strokeWidth={1.5} />
-                            </div>
-                            <div>
-                              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">Horário</p>
-                              <p className="text-base font-bold text-foreground">{selectedRes.timeRange} <span className="text-muted-foreground font-medium">({selectedRes.duration})</span></p>
-                            </div>
-                         </div>
-                      </div>
-    
-                      <div className="mb-12">
-                         <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-6">Disponibilidade do Dia ({selectedRes.date.toUpperCase()})</h3>
-                         
-                         <div className="w-full h-10 bg-success/10 rounded-xl overflow-hidden flex relative border-2 border-success/20">
-                            <div className="absolute left-[30%] w-[30%] h-full bg-warning flex items-center justify-center">
-                               <span className="text-[11px] font-bold text-white uppercase tracking-wider shadow-sm">Solicitado</span>
-                            </div>
-                         </div>
-                         <div className="flex justify-between mt-3 px-2">
-                            <span className="text-[11px] text-muted-foreground font-medium">06:00</span>
-                            <span className="text-[11px] text-muted-foreground font-medium">10:00</span>
-                            <span className="text-[11px] text-brand font-bold">12:00</span>
-                            <span className="text-[11px] text-brand font-bold">14:00</span>
-                            <span className="text-[11px] text-muted-foreground font-medium">16:00</span>
-                            <span className="text-[11px] text-muted-foreground font-medium">18:00</span>
-                            <span className="text-[11px] text-muted-foreground font-medium">20:00</span>
-                            <span className="text-[11px] text-muted-foreground font-medium">22:00</span>
-                         </div>
-                      </div>
-    
-                      <div className="flex flex-wrap gap-6 mb-14">
-                         <div className="flex-1 min-w-[200px] bg-accent/30 rounded-2xl p-6 text-center border border-slate-100">
-                           <p className="text-[11px] text-muted-foreground mb-2 font-bold uppercase tracking-wider">Capacidade</p>
-                           <p className="text-xl font-bold text-foreground">{selectedRes.capacity} Pessoas</p>
-                         </div>
-                         <div className="flex-1 min-w-[200px] bg-accent/30 rounded-2xl p-6 text-center border border-slate-100">
-                           <p className="text-[11px] text-muted-foreground mb-2 font-bold uppercase tracking-wider">Taxa de Limpeza</p>
-                           <p className="text-xl font-bold text-foreground">{selectedRes.cleaningFee}</p>
-                         </div>
-                         <div className="flex-1 min-w-[200px] bg-accent/30 rounded-2xl p-6 text-center border border-slate-100">
-                           <p className="text-[11px] text-muted-foreground mb-2 font-bold uppercase tracking-wider">Regra Específica</p>
-                           <p className="text-xl font-bold text-foreground">{selectedRes.specificRule}</p>
-                         </div>
-                      </div>
-    
-                      <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-6 flex items-center gap-2">
-                         <Clock size={14} /> Outras Reservas no Dia ({selectedRes.date.toUpperCase()})
-                      </h3>
-                      <div className="space-y-4">
-                         <div className="flex justify-between items-center p-5 border-2 border-slate-100 rounded-2xl bg-background shadow-sm">
-                           <div>
-                             <h4 className="font-bold text-base text-foreground mb-1.5">Salão de Festas</h4>
-                             <p className="text-[13px] text-muted-foreground font-medium">19:00 - 23:00 • Apt 501</p>
-                           </div>
-                           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-bold uppercase tracking-wider text-emerald-600 border border-emerald-200"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Confirmado</span>
-                         </div>
-                         <div className="flex justify-between items-center p-5 border-2 border-slate-100 rounded-2xl bg-background shadow-sm">
-                           <div>
-                             <h4 className="font-bold text-base text-foreground mb-1.5">Academia</h4>
-                             <p className="text-[13px] text-muted-foreground font-medium">07:00 - 08:00 • Apt 102</p>
-                           </div>
-                           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-bold uppercase tracking-wider text-muted-foreground border border-border"><span className="w-1.5 h-1.5 rounded-full bg-muted-foreground"></span>Concluído</span>
-                         </div>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="h-full flex flex-col items-center justify-center text-center p-12">
-                      <div className="w-16 h-16 rounded-full bg-accent text-muted-foreground flex items-center justify-center mb-4">
-                        <CalendarIcon size={32} />
-                      </div>
-                      <p className="text-sm text-muted-foreground">Selecione uma reserva para visualizar detalhes</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {selectedRes && (
-              <div className="w-[300px] bg-card p-6 shrink-0 overflow-y-auto custom-scrollbar hidden lg:block border-l border-border">
-                 <div className="space-y-6">
-                    <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-6">Solicitante</h3>
-                    
-                    <div className="flex items-center gap-3 mb-4">
-                       <div className="w-10 h-10 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold text-sm shrink-0">
-                         {selectedRes.requesterInitials}
-                       </div>
-                       <div>
-                         <p className="font-bold text-sm text-foreground leading-tight mb-1">{selectedRes.requesterName}</p>
-                         <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{selectedRes.requesterRole}</p>
-                       </div>
-                    </div>
-  
-                    <div className="flex gap-2 mb-6">
-                       <span className="px-2 py-1 bg-brand/10 text-brand rounded text-[10px] font-bold">Proprietário</span>
-                       <span className={`px-2 py-1 rounded text-[10px] font-bold ${selectedRes.requesterStatus === 'Adimplente' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                         {selectedRes.requesterStatus}
-                       </span>
-                    </div>
-  
-                    <div className="space-y-4 mb-6">
-                       <div className="flex items-start gap-3 text-sm">
-                          <MapPin size={16} className="text-muted-foreground mt-0.5 shrink-0" />
-                          <div>
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Unidade</p>
-                            <p className="font-medium text-foreground">{selectedRes.unit}{selectedRes.block ? `, ${selectedRes.block}` : ''}</p>
-                          </div>
-                       </div>
-                       <div className="flex items-start gap-3 text-sm">
-                          <Phone size={16} className="text-muted-foreground mt-0.5 shrink-0" />
-                          <div>
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Telefone</p>
-                            <p className="font-medium text-foreground">{selectedRes.requesterPhone}</p>
-                          </div>
-                       </div>
-                       <div className="flex items-start gap-3 text-sm">
-                          <Mail size={16} className="text-muted-foreground mt-0.5 shrink-0" />
-                          <div>
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Email</p>
-                            <p className="font-medium text-foreground truncate w-40">{selectedRes.requesterEmail}</p>
-                          </div>
-                       </div>
-                    </div>
-  
-                    <div className="border-t border-border pt-6 space-y-3 mb-6">
-                       <div className="flex justify-between items-center text-sm">
-                          <span className="text-muted-foreground font-medium">Reservas (Mês)</span>
-                          <span className="font-bold text-foreground">{selectedRes.reservationsMonth}</span>
-                       </div>
-                       <div className="flex justify-between items-center text-sm">
-                          <span className="text-muted-foreground font-medium">Multas/Infrações</span>
-                          <span className={`font-bold ${selectedRes.infractions === 'Nenhuma' ? 'text-emerald-500' : 'text-red-500'}`}>{selectedRes.infractions}</span>
-                       </div>
-                    </div>
-  
-                    <div>
-                       <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Observações do Morador</h3>
-                       <div className="p-4 bg-accent/30 rounded-xl italic text-sm text-foreground leading-relaxed border border-border/50">
-                          {selectedRes.observations}
-                       </div>
-                    </div>
-  
-                    <button className="w-full mt-6 px-4 py-2.5 bg-background border cursor-pointer border-border rounded-lg text-sm font-semibold text-foreground hover:bg-accent hover:text-brand transition-colors shadow-sm">
-                       Ver Perfil Completo
+    return (
+        <div className="flex flex-col h-full bg-background overflow-hidden relative">
+            <div className="flex items-center justify-between px-8 pt-4 border-b border-border bg-card shrink-0 h-[72px]">
+                <div className="flex items-center gap-8 h-full">
+                    <button className="text-sm h-full flex items-center border-b-2 border-brand font-bold text-brand cursor-default">
+                        Reservas
                     </button>
-                 </div>
-              </div>
+                    <button
+                        onClick={() => navigate('/syndic/common-areas')}
+                        className="text-sm h-full flex items-center border-b-2 border-transparent font-semibold text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+                    >
+                        Áreas Comuns e Regras
+                    </button>
+                </div>
+            </div>
+
+            {loadError && (
+                <div className="mx-6 mt-4 bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-lg px-4 py-3">
+                    {loadError}
+                </div>
             )}
-            
-          </>
-        ) : (
-          <div className="flex-1 overflow-y-auto">
-            <CommonAreaRules />
-          </div>
-        )}
-      </div>
-    </div>
-  );
+
+            <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
+                <div
+                    className={`
+                    w-full lg:w-[340px] flex flex-col bg-card border-r border-border shrink-0 z-10
+                    ${selectedId ? 'hidden lg:flex' : 'flex'}
+                `}
+                >
+                    <div className="p-4 md:p-6 flex flex-col h-full overflow-hidden">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="font-bold text-xl text-foreground">Reservas</h3>
+                            <div className="relative" ref={filterRef}>
+                                <button
+                                    onClick={() => activeTab === 'all' && setFilterPanelOpen((v) => !v)}
+                                    disabled={activeTab !== 'all'}
+                                    title={activeTab === 'all' ? 'Filtrar' : 'Filtros disponíveis na aba Todos'}
+                                    className="relative text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                                >
+                                    <Filter size={20} strokeWidth={1.5} />
+                                    {hasExtraFilters && (
+                                        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-brand" />
+                                    )}
+                                </button>
+
+                                {filterPanelOpen && activeTab === 'all' && (
+                                    <div className="absolute right-0 top-full mt-2 w-64 bg-card border border-border rounded-xl shadow-lg p-4 z-30 flex flex-col gap-4">
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                                                Filtros
+                                            </p>
+                                            <button
+                                                onClick={() => setFilterPanelOpen(false)}
+                                                className="text-muted-foreground hover:text-foreground cursor-pointer"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        </div>
+
+                                        <div className="flex flex-col gap-1.5">
+                                            <label className="text-xs font-medium text-foreground">Status</label>
+                                            <select
+                                                value={filterStatus}
+                                                onChange={(e) => setFilterStatus(e.target.value as ReservationStatus | '')}
+                                                className="px-3 py-1.5 text-sm bg-input-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/60 transition-colors"
+                                            >
+                                                <option value="">Todos os status</option>
+                                                {EXTRA_STATUS_OPTIONS.map((opt) => (
+                                                    <option key={opt.value} value={opt.value}>
+                                                        {opt.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        <div className="flex flex-col gap-1.5">
+                                            <label className="text-xs font-medium text-foreground">Dia</label>
+                                            <input
+                                                type="date"
+                                                value={filterDate}
+                                                onChange={(e) => setFilterDate(e.target.value)}
+                                                className="px-3 py-1.5 text-sm bg-input-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/60 transition-colors"
+                                            />
+                                        </div>
+
+                                        {hasExtraFilters && (
+                                            <button
+                                                onClick={() => {
+                                                    setFilterStatus('');
+                                                    setFilterDate('');
+                                                }}
+                                                className="text-xs font-semibold text-brand hover:opacity-80 transition-opacity self-start cursor-pointer"
+                                            >
+                                                Limpar filtros
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 border-b border-border/50 pb-4 mb-4">
+                            <button
+                                onClick={() => handleTabChange('pending')}
+                                className={`px-3 py-1.5 cursor-pointer text-sm font-bold rounded-full transition-colors ${activeTab === 'pending' ? 'bg-brand/10 text-brand' : 'text-muted-foreground hover:text-foreground'}`}
+                            >
+                                Pendentes ({items.filter((r) => r.status === 'pending').length})
+                            </button>
+                            <button
+                                onClick={() => handleTabChange('all')}
+                                className={`px-3 py-1.5 cursor-pointer text-sm font-bold rounded-full transition-colors ${activeTab === 'all' ? 'bg-brand/10 text-brand' : 'text-muted-foreground hover:text-foreground'}`}
+                            >
+                                Todos ({items.length})
+                            </button>
+                        </div>
+
+                        <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar -mx-4 md:-mx-6">
+                            {isLoading ? (
+                                <p className="px-4 md:px-6 text-sm text-muted-foreground">Carregando...</p>
+                            ) : filteredItems.length === 0 ? (
+                                <p className="px-4 md:px-6 text-sm text-muted-foreground">Nenhuma reserva encontrada.</p>
+                            ) : (
+                                filteredItems.map((res) => (
+                                    <div
+                                        key={res.id}
+                                        onClick={() => setSelectedId(res.id)}
+                                        className={`p-4 md:p-6 cursor-pointer transition-colors border-b border-border relative
+                                            ${selectedId === res.id ? 'bg-background border-l-[3px] border-l-brand' : 'bg-card hover:bg-accent/20 border-l-[3px] border-l-transparent'}
+                                        `}
+                                    >
+                                        <div className="flex justify-between items-start mb-3">
+                                            <StatusBadge status={res.status} />
+                                            <span className="text-[11px] text-muted-foreground font-medium">
+                                                {formatDate(res.created_at)}
+                                            </span>
+                                        </div>
+                                        <h4 className="font-bold text-sm text-foreground mb-1 leading-tight">
+                                            {res.common_area?.name ?? 'Área removida'}
+                                        </h4>
+                                        <p className="text-[11px] text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
+                                            Reserva solicitada por {res.user?.full_name ?? 'morador'} para{' '}
+                                            {formatDate(res.start_time)} ({formatTimeRange(res.start_time, res.end_time)}).
+                                        </p>
+                                        <div className="flex items-center justify-between">
+                                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-accent text-[10px] font-bold text-muted-foreground uppercase rounded">
+                                                {res.unit ? `Unidade ${res.unit.number}` : '—'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    className={`
+                    flex-1 min-h-0 flex flex-col bg-background min-w-0 relative
+                    ${!selectedId ? 'hidden lg:flex' : 'flex'}
+                `}
+                >
+                    <button
+                        onClick={() => setSelectedId(null)}
+                        className="lg:hidden absolute top-4 left-4 p-2 cursor-pointer text-brand font-bold flex items-center gap-1 z-20"
+                    >
+                        &lsaquo; Voltar
+                    </button>
+
+                    <div className="flex-1 min-h-0 overflow-y-auto p-6 md:p-8 lg:p-12 custom-scrollbar bg-background">
+                        {selectedRes ? (
+                            <div className="w-full">
+                                <div className="flex flex-col md:flex-row md:items-start justify-between mb-10 gap-6">
+                                    <div>
+                                        <h1 className="text-3xl font-black text-foreground mb-4 tracking-tight">
+                                            {selectedRes.common_area?.name ?? 'Área removida'}
+                                        </h1>
+                                        <StatusBadge status={selectedRes.status} />
+                                    </div>
+
+                                    <div className="flex items-center gap-3 shrink-0 mt-2 md:mt-0 flex-wrap">
+                                        {selectedRes.status === 'pending' && (
+                                            <>
+                                                <button
+                                                    onClick={() => handleAction(selectedRes, 'denied')}
+                                                    disabled={actioningId === selectedRes.id}
+                                                    className="flex items-center gap-2 px-5 py-2.5 cursor-pointer bg-background border border-destructive/40 text-destructive text-sm font-bold rounded-xl hover:bg-destructive/10 transition-colors disabled:opacity-50 shadow-sm"
+                                                >
+                                                    <X size={16} strokeWidth={2.5} /> Recusar
+                                                </button>
+                                                <button
+                                                    onClick={() => handleAction(selectedRes, 'confirmed')}
+                                                    disabled={actioningId === selectedRes.id}
+                                                    className="flex items-center gap-2 px-6 py-2.5 cursor-pointer bg-success text-white text-sm font-bold rounded-xl hover:bg-success/90 transition-colors shadow-sm disabled:opacity-50"
+                                                >
+                                                    <Check size={16} strokeWidth={2.5} /> Aprovar
+                                                </button>
+                                            </>
+                                        )}
+                                        {selectedRes.status === 'confirmed' && (
+                                            <>
+                                                <button
+                                                    onClick={() => handleAction(selectedRes, 'canceled')}
+                                                    disabled={actioningId === selectedRes.id}
+                                                    className="flex items-center gap-2 px-5 py-2.5 cursor-pointer bg-background border border-destructive/40 text-destructive text-sm font-bold rounded-xl hover:bg-destructive/10 transition-colors disabled:opacity-50 shadow-sm"
+                                                >
+                                                    <X size={16} strokeWidth={2.5} /> Cancelar
+                                                </button>
+                                                <button
+                                                    onClick={() => handleAction(selectedRes, 'completed')}
+                                                    disabled={actioningId === selectedRes.id}
+                                                    className="flex items-center gap-2 px-6 py-2.5 cursor-pointer bg-success text-white text-sm font-bold rounded-xl hover:bg-success/90 transition-colors shadow-sm disabled:opacity-50"
+                                                >
+                                                    <Check size={16} strokeWidth={2.5} /> Marcar como concluída
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {actionError && <p className="text-sm text-destructive mb-6">{actionError}</p>}
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                    <div className="bg-background border-2 border-slate-100 rounded-2xl p-6 flex items-center gap-5 shadow-sm">
+                                        <div className="w-12 h-12 rounded-full bg-brand/5 text-brand flex items-center justify-center shrink-0">
+                                            <CalendarIcon size={24} strokeWidth={1.5} />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">
+                                                Data
+                                            </p>
+                                            <p className="text-base font-bold text-foreground">
+                                                {formatDate(selectedRes.start_time)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-background border-2 border-slate-100 rounded-2xl p-6 flex items-center gap-5 shadow-sm">
+                                        <div className="w-12 h-12 rounded-full bg-brand/5 text-brand flex items-center justify-center shrink-0">
+                                            <Clock size={24} strokeWidth={1.5} />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">
+                                                Horário
+                                            </p>
+                                            <p className="text-base font-bold text-foreground">
+                                                {formatTimeRange(selectedRes.start_time, selectedRes.end_time)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-wrap gap-4 mb-12">
+                                    <div className="flex-1 min-w-[160px] bg-accent/30 rounded-2xl p-6 text-center border border-slate-100">
+                                        <Users size={18} className="text-brand mx-auto mb-2" />
+                                        <p className="text-[11px] text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+                                            Capacidade
+                                        </p>
+                                        <p className="text-xl font-bold text-foreground">
+                                            {selectedRes.common_area?.capacity
+                                                ? `${selectedRes.common_area.capacity} Pessoas`
+                                                : '—'}
+                                        </p>
+                                    </div>
+                                    <div className="flex-1 min-w-[160px] bg-accent/30 rounded-2xl p-6 text-center border border-slate-100">
+                                        <Tag size={18} className="text-brand mx-auto mb-2" />
+                                        <p className="text-[11px] text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+                                            Taxa de Uso
+                                        </p>
+                                        <p className="text-xl font-bold text-foreground">
+                                            {selectedRes.common_area?.booking_rules?.fee
+                                                ? `R$ ${selectedRes.common_area.booking_rules.fee.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                                                : 'Gratuito'}
+                                        </p>
+                                    </div>
+                                    <div className="flex-1 min-w-[160px] bg-accent/30 rounded-2xl p-6 text-center border border-slate-100">
+                                        <ShieldCheck size={18} className="text-brand mx-auto mb-2" />
+                                        <p className="text-[11px] text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+                                            Aprovação
+                                        </p>
+                                        <p className="text-xl font-bold text-foreground">
+                                            {selectedRes.common_area?.booking_rules?.requires_approval ? 'Manual' : 'Automática'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {timelineRange && (
+                                    <div className="mb-12 bg-background border-2 border-slate-100 rounded-2xl p-6 shadow-sm">
+                                        <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-6">
+                                            Disponibilidade do Dia ({formatDate(selectedRes.start_time)})
+                                        </h3>
+                                        <div className="relative w-full h-12 bg-accent/40 rounded-xl overflow-hidden">
+                                            {dayReservations.map((res) => (
+                                                <div
+                                                    key={res.id}
+                                                    title={`${res.unit ? `Unidade ${res.unit.number} · ` : ''}${formatTimeRange(res.start_time, res.end_time)} · ${STATUS_LABELS[res.status]}`}
+                                                    style={timelineBlockStyle(res, timelineRange)}
+                                                    className={`absolute top-0.5 bottom-0.5 rounded-md flex items-center justify-center px-1 transition-all
+                                                        ${STATUS_BAR_COLORS[res.status]}
+                                                        ${res.id === selectedRes.id ? 'ring-2 ring-brand z-10' : ''}
+                                                    `}
+                                                >
+                                                    <span className="text-[10px] font-bold text-white uppercase tracking-wider truncate">
+                                                        {res.id === selectedRes.id ? 'Selecionada' : STATUS_LABELS[res.status]}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="relative w-full h-4 mt-3">
+                                            <span className="absolute left-0 text-[11px] text-muted-foreground font-medium">
+                                                {minutesToHM(timelineRange.opens)}
+                                            </span>
+                                            <span className="absolute right-0 text-[11px] text-muted-foreground font-medium">
+                                                {minutesToHM(timelineRange.closes)}
+                                            </span>
+                                            {timeMarks.map(({ minute, isSelected }) => (
+                                                <span
+                                                    key={`label-${minute}`}
+                                                    className={`absolute -translate-x-1/2 text-[11px] font-medium whitespace-nowrap ${
+                                                        isSelected ? 'text-brand font-bold' : 'text-muted-foreground'
+                                                    }`}
+                                                    style={{ left: `${tickPercent(minute, timelineRange)}%` }}
+                                                >
+                                                    {minutesToHM(minute)}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedRes.notes && (
+                                    <div className="mb-12">
+                                        <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-3">
+                                            Observações
+                                        </h3>
+                                        <div className="p-4 bg-accent/30 rounded-xl italic text-sm text-foreground leading-relaxed border border-border/50">
+                                            {selectedRes.notes}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {otherSameDay.length > 0 && (
+                                    <>
+                                        <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-6 flex items-center gap-2">
+                                            <Clock size={14} /> Outras reservas no dia
+                                        </h3>
+                                        <div className="space-y-4">
+                                            {otherSameDay.map((other) => (
+                                                <div
+                                                    key={other.id}
+                                                    className="flex justify-between items-center p-5 border-2 border-slate-100 rounded-2xl bg-background shadow-sm"
+                                                >
+                                                    <div>
+                                                        <h4 className="font-bold text-base text-foreground mb-1.5">
+                                                            {formatTimeRange(other.start_time, other.end_time)}
+                                                        </h4>
+                                                        <p className="text-[13px] text-muted-foreground font-medium">
+                                                            {other.unit ? `Unidade ${other.unit.number}` : '—'}
+                                                        </p>
+                                                    </div>
+                                                    <StatusBadge status={other.status} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="h-full flex flex-col items-center justify-center text-center p-12">
+                                <div className="w-16 h-16 rounded-full bg-accent text-muted-foreground flex items-center justify-center mb-4">
+                                    <CalendarIcon size={32} />
+                                </div>
+                                <p className="text-sm text-muted-foreground">Selecione uma reserva para visualizar detalhes</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {selectedRes && (
+                    <div className="w-[300px] bg-card p-6 shrink-0 overflow-y-auto custom-scrollbar hidden lg:block border-l border-border">
+                        <div className="space-y-6">
+                            <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-6">
+                                Solicitante
+                            </h3>
+
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-12 h-12 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold text-base shrink-0">
+                                    {(selectedRes.user?.full_name ?? '??')
+                                        .split(' ')
+                                        .slice(0, 2)
+                                        .map((p) => p[0]?.toUpperCase())
+                                        .join('')}
+                                </div>
+                                <div>
+                                    <p className="font-bold text-sm text-foreground leading-tight mb-1">
+                                        {selectedRes.user?.full_name ?? 'Morador'}
+                                    </p>
+                                    {selectedRes.unit && (
+                                        <span className="inline-block px-2 py-0.5 bg-brand/10 text-brand rounded text-[10px] font-bold uppercase tracking-wider">
+                                            Unidade {selectedRes.unit.number}
+                                            {selectedRes.unit.floor ? ` · ${selectedRes.unit.floor}º andar` : ''}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {selectedRes.user?.phone_number && (
+                                <div className="flex items-start gap-3 text-sm border-t border-border pt-4">
+                                    <Phone size={16} className="text-muted-foreground mt-0.5 shrink-0" />
+                                    <div>
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">
+                                            Telefone
+                                        </p>
+                                        <p className="font-medium text-foreground">{selectedRes.user.phone_number}</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
 }
